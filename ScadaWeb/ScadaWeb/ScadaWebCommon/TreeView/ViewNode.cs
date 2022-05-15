@@ -20,7 +20,7 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2016
- * Modified : 2021
+ * Modified : 2022
  */
 
 using System;
@@ -153,9 +153,6 @@ namespace Scada.Web.TreeView
         {
             if (other == null)
                 return 1;
-
-            if (IsEmpty && string.Equals(ShortPath, other.ShortPath, StringComparison.OrdinalIgnoreCase))
-                return 0;
 
             int compareResult = SortOrder.CompareTo(other.SortOrder);
             if (compareResult != 0)

@@ -18,44 +18,9 @@ namespace Scada.Admin.Extensions.ExtCommConfig.Forms
     /// </summary>
     public partial class FrmCnlCreate : Form
     {
-        /// <summary>
-        /// Contains indexes for the dictionaries.
-        /// </summary>
-        private class DictIndexes
-        {
-            public DictIndexes(ConfigBase configBase)
-            {
-                FormatByCode = new Dictionary<string, int>();
-                QuantityByCode = new Dictionary<string, int>();
-                UnitByCode = new Dictionary<string, int>();
-
-                foreach (Format format in configBase.FormatTable.Enumerate())
-                {
-                    if (!string.IsNullOrEmpty(format.Code))
-                        FormatByCode[format.Code] = format.FormatID;
-                }
-
-                foreach (Quantity quantity in configBase.QuantityTable.Enumerate())
-                {
-                    if (!string.IsNullOrEmpty(quantity.Code))
-                        QuantityByCode[quantity.Code] = quantity.QuantityID;
-                }
-
-                foreach (Unit unit in configBase.UnitTable.Enumerate())
-                {
-                    if (!string.IsNullOrEmpty(unit.Code))
-                        UnitByCode[unit.Code] = unit.UnitID;
-                }
-            }
-            public Dictionary<string, int> FormatByCode { get; private set; }
-            public Dictionary<string, int> QuantityByCode { get; private set; }
-            public Dictionary<string, int> UnitByCode { get; private set; }
-        }
-
         private readonly IAdminContext adminContext;      // the Administrator context
         private readonly ScadaProject project;            // the project under development
         private readonly RecentSelection recentSelection; // the recently selected objects
-        private readonly ChannelWizardOptions options;    // the channel wizard options
         private int step;                                 // the current step of the wizard
 
 
@@ -76,7 +41,6 @@ namespace Scada.Admin.Extensions.ExtCommConfig.Forms
             this.adminContext = adminContext ?? throw new ArgumentNullException(nameof(adminContext));
             this.project = project ?? throw new ArgumentNullException(nameof(project));
             this.recentSelection = recentSelection ?? throw new ArgumentNullException(nameof(recentSelection));
-            options = new ChannelWizardOptions(adminContext.AppConfig.GetOptions(ChannelWizardOptions.GroupName));
             step = 1;
         }
 
@@ -150,10 +114,10 @@ namespace Scada.Admin.Extensions.ExtCommConfig.Forms
         {
             List<Cnl> cnls = new();
             int cnlNum = ctrlCnlCreate3.StartCnlNum;
-            string namePrefix = options.PrependDeviceName ? ctrlCnlCreate1.SelectedDevice.Name + " - " : "";
+            string namePrefix = adminContext.AppConfig.ChannelNumberingOptions.PrependDeviceName ? 
+                ctrlCnlCreate1.SelectedDevice.Name + " - " : "";
             int? objNum = ctrlCnlCreate2.ObjNum;
             int deviceNum = ctrlCnlCreate1.SelectedDevice.DeviceNum;
-            DictIndexes dictIndexes = new(project.ConfigBase);
 
             foreach (CnlPrototype cnlPrototype in ctrlCnlCreate1.CnlPrototypes)
             {
@@ -172,9 +136,9 @@ namespace Scada.Admin.Extensions.ExtCommConfig.Forms
                     FormulaEnabled = cnlPrototype.FormulaEnabled,
                     InFormula = cnlPrototype.InFormula,
                     OutFormula = cnlPrototype.OutFormula,
-                    FormatID = GetEntityID(dictIndexes.FormatByCode, cnlPrototype.FormatCode),
-                    QuantityID = GetEntityID(dictIndexes.QuantityByCode, cnlPrototype.QuantityCode),
-                    UnitID = GetEntityID(dictIndexes.UnitByCode, cnlPrototype.UnitCode),
+                    FormatID = project.ConfigBase.GetFormatByCode(cnlPrototype.FormatCode)?.FormatID,
+                    QuantityID = project.ConfigBase.GetQuantityByCode(cnlPrototype.QuantityCode)?.QuantityID,
+                    UnitID = project.ConfigBase.GetUnitByCode(cnlPrototype.UnitCode)?.UnitID,
                     LimID = null,
                     ArchiveMask = cnlPrototype.ArchiveMask,
                     EventMask = cnlPrototype.EventMask
@@ -194,18 +158,14 @@ namespace Scada.Admin.Extensions.ExtCommConfig.Forms
         /// </summary>
         private void AddChannels(List<Cnl> cnls, bool silent)
         {
-            cnls.ForEach(cnl => project.ConfigBase.CnlTable.AddItem(cnl));
+            if (cnls.Count > 0)
+            {
+                cnls.ForEach(cnl => project.ConfigBase.CnlTable.AddItem(cnl));
+                project.ConfigBase.CnlTable.Modified = true;
+            }
 
             if (!silent)
                 ScadaUiUtils.ShowInfo(ExtensionPhrases.CreateCnlsCompleted, cnls.Count);
-        }
-
-        /// <summary>
-        /// Gets the entity ID by its code using the specified index.
-        /// </summary>
-        private static int? GetEntityID(Dictionary<string, int> tableIndex, string entityCode)
-        {
-            return !string.IsNullOrEmpty(entityCode) && tableIndex.TryGetValue(entityCode, out int id) ? id : null;
         }
 
 
@@ -218,7 +178,7 @@ namespace Scada.Admin.Extensions.ExtCommConfig.Forms
 
             ctrlCnlCreate1.Init(adminContext, project, recentSelection);
             ctrlCnlCreate2.Init(project, recentSelection);
-            ctrlCnlCreate3.Init(adminContext, project, options);
+            ctrlCnlCreate3.Init(adminContext, project);
             ApplyStep(0);
         }
 

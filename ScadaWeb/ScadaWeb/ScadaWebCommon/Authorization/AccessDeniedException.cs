@@ -20,11 +20,10 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2021
- * Modified : 2021
+ * Modified : 2022
  */
 
 using Scada.Web.Lang;
-using System;
 
 namespace Scada.Web.Authorization
 {
@@ -32,12 +31,12 @@ namespace Scada.Web.Authorization
     /// Represents an exception raised when the user cannot access services.
     /// <para>Представляет исключение, возникающее, когда пользователь не может получить доступ к службам.</para>
     /// </summary>
-    public class AccessDeniedException : Exception
+    public class AccessDeniedException : ApiException
     {
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
-        public AccessDeniedException()
+        public AccessDeniedException() 
             : base(WebPhrases.AccessDenied)
         {
         }

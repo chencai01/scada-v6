@@ -35,6 +35,7 @@ using Scada.Agent;
 using Scada.Agent.Client;
 using Scada.Comm.Config;
 using Scada.Data.Entities;
+using Scada.Data.Tables;
 using Scada.Forms;
 using Scada.Lang;
 using Scada.Log;
@@ -913,13 +914,29 @@ namespace Scada.Admin.App.Forms
         /// <summary>
         /// Refreshes child forms that contains a configuration database table with the specified item type.
         /// </summary>
-        public void RefreshBaseTables(Type itemType)
+        public void RefreshBaseTables(Type itemType, bool saveChanges)
         {
+            // save table
+            bool tableSaved = false;
+
+            if (saveChanges && Project != null && 
+                Project.ConfigBase.GetTable(itemType) is IBaseTable baseTable && baseTable.Modified)
+            {
+                if (Project.ConfigBase.SaveTable(baseTable, out string errMsg))
+                    tableSaved = true;
+                else
+                    appData.ErrLog.HandleError(errMsg);
+            }
+
+            // refresh child forms
             foreach (Form form in wctrlMain.Forms)
             {
                 if (form is FrmBaseTable frmBaseTable && frmBaseTable.ItemType == itemType)
                     frmBaseTable.ChildFormTag.SendMessage(this, AdminMessage.RefreshData);
             }
+
+            if (tableSaved)
+                DisableSaveAll();
         }
 
         /// <summary>

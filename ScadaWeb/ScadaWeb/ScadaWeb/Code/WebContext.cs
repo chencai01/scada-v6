@@ -27,7 +27,6 @@ using Scada.Client;
 using Scada.Config;
 using Scada.Data.Const;
 using Scada.Data.Entities;
-using Scada.Data.Models;
 using Scada.Data.Tables;
 using Scada.Lang;
 using Scada.Log;
@@ -88,9 +87,7 @@ namespace Scada.Web.Code
             AppConfig = new WebConfig();
             AppDirs = new WebDirs();
             Log = LogStub.Instance;
-            BaseDataSet = new BaseDataSet();
-            RightMatrix = new RightMatrix();
-            Enums = new EnumDict();
+            ConfigBase = new ConfigBase();
             ClientPool = new ScadaClientPool();
             PluginHolder = new PluginHolder();
             CacheExpirationTokenSource = new CancellationTokenSource();
@@ -137,17 +134,7 @@ namespace Scada.Web.Code
         /// <summary>
         /// Gets the cached configuration database.
         /// </summary>
-        public BaseDataSet BaseDataSet { get; private set; }
-
-        /// <summary>
-        /// Gets the access rights.
-        /// </summary>
-        public RightMatrix RightMatrix { get; private set; }
-
-        /// <summary>
-        /// Gets the enumerations.
-        /// </summary>
-        public EnumDict Enums { get; private set; }
+        public ConfigBase ConfigBase { get; private set; }
 
         /// <summary>
         /// Gets the client pool.
@@ -157,7 +144,7 @@ namespace Scada.Web.Code
         /// <summary>
         /// Gets the object containing plugins.
         /// </summary>
-        public PluginHolder PluginHolder { get; private set; }
+        public PluginHolder PluginHolder { get; }
 
         /// <summary>
         /// Gets the source object that can send expiration notification to the memory cache.
@@ -222,23 +209,6 @@ namespace Scada.Web.Code
         }
 
         /// <summary>
-        /// Updates the application culture according to the configuration.
-        /// </summary>
-        private void UpdateCulture()
-        {
-            string cultureName = ScadaUtils.FirstNonEmpty(
-                InstanceConfig.Culture,
-                AppConfig.GeneralOptions.DefaultCulture,
-                Locale.DefaultCulture.Name);
-
-            if (Locale.Culture.Name != cultureName)
-            {
-                Locale.SetCulture(cultureName);
-                LocalizeApp();
-            }
-        }
-
-        /// <summary>
         /// Initializes the application storage.
         /// </summary>
         private bool InitStorage()
@@ -265,7 +235,7 @@ namespace Scada.Web.Code
                 if (Log is LogFile logFile)
                     logFile.CapacityMB = webConfig.GeneralOptions.MaxLogSize;
 
-                UpdateCulture();
+                UpdateCulture(webConfig);
                 return true;
             }
             else
@@ -277,44 +247,61 @@ namespace Scada.Web.Code
         }
 
         /// <summary>
+        /// Updates the application culture according to the configuration.
+        /// </summary>
+        private void UpdateCulture(WebConfig webConfig)
+        {
+            string cultureName = ScadaUtils.FirstNonEmpty(
+                InstanceConfig.Culture,
+                webConfig.GeneralOptions.DefaultCulture,
+                Locale.DefaultCulture.Name);
+
+            if (Locale.Culture.Name != cultureName)
+            {
+                Locale.SetCulture(cultureName);
+                LocalizeApp();
+            }
+        }
+
+        /// <summary>
         /// Initializes plugins.
         /// </summary>
-        private PluginHolder InitPlugins(WebConfig webConfig)
+        private void InitPlugins()
         {
-            PluginHolder curPluginHolder = PluginHolder;
-            PluginHolder newPluginHolder = new() { Log = Log };
-
-            foreach (string pluginCode in webConfig.PluginCodes)
+            if (pluginsReady)
             {
-                if (curPluginHolder.GetPlugin(pluginCode, out PluginLogic pluginLogic))
+                Log.WriteInfo(Locale.IsRussian ?
+                    "Плагины добавляются один раз при запуске приложения" :
+                    "Plugins are added once at application startup");
+            }
+            else
+            {
+                PluginHolder.Log = Log;
+
+                foreach (string pluginCode in AppConfig.PluginCodes)
                 {
-                    // add existing plugin
-                    Log.WriteAction(Locale.IsRussian ?
-                        "Плагин {0} использован повторно" :
-                        "Plugin {0} reused", pluginCode);
-                    newPluginHolder.AddPlugin(pluginLogic);
-                }
-                else if (PluginFactory.GetPluginLogic(AppDirs.ExeDir, pluginCode, this, 
-                    out pluginLogic, out string message))
-                {
-                    // add new plugin
-                    Log.WriteAction(message);
-                    newPluginHolder.AddPlugin(pluginLogic);
-                }
-                else
-                {
-                    Log.WriteError(message);
+                    if (PluginFactory.GetPluginLogic(AppDirs.ExeDir, pluginCode, this, 
+                        out PluginLogic pluginLogic, out string message))
+                    {
+                        Log.WriteAction(message);
+                        PluginHolder.AddPlugin(pluginLogic);
+                    }
+                    else
+                    {
+                        Log.WriteError(message);
+                    }
                 }
             }
 
-            newPluginHolder.DefineFeaturedPlugins(webConfig.PluginAssignment);
-            return newPluginHolder;
+            PluginHolder.DefineFeaturedPlugins(AppConfig.PluginAssignment);
+            PluginHolder.LoadDictionaries();
+            PluginHolder.LoadConfig();
         }
 
         /// <summary>
         /// Reads the configuration database.
         /// </summary>
-        private bool ReadBase(out BaseDataSet baseDataSet)
+        private bool ReadBase(out ConfigBase configBase)
         {
             Log.WriteAction(Locale.IsRussian ?
                 "Приём базы конфигурации" :
@@ -329,9 +316,12 @@ namespace Scada.Web.Code
 
                 if (!serverIsReady)
                 {
-                    throw new ScadaException(Locale.IsRussian ?
+                    scadaClient.TerminateSession();
+                    Log.WriteError(Locale.IsRussian ?
                         "Сервер не готов" :
                         "Server is not ready");
+                    configBase = null;
+                    return false;
                 }
             }
             catch (Exception ex)
@@ -339,7 +329,7 @@ namespace Scada.Web.Code
                 Log.WriteError(ex.BuildErrorMessage(Locale.IsRussian ?
                     "Ошибка при проверке соединения с сервером" :
                     "Error checking server connection"));
-                baseDataSet = null;
+                configBase = null;
                 return false;
             }
 
@@ -348,17 +338,16 @@ namespace Scada.Web.Code
 
             try
             {
-                baseDataSet = new BaseDataSet();
+                configBase = new ConfigBase();
 
-                foreach (IBaseTable baseTable in baseDataSet.AllTables)
+                foreach (IBaseTable baseTable in configBase.AllTables)
                 {
                     tableName = baseTable.Name;
                     scadaClient.DownloadBaseTable(baseTable);
                 }
 
                 tableName = CommonPhrases.UndefinedTable;
-                scadaClient.TerminateSession();
-                PostprocessBase(baseDataSet);
+                PostprocessBase(configBase);
                 Log.WriteAction(Locale.IsRussian ?
                     "База конфигурации получена успешно" :
                     "The configuration database has been received successfully");
@@ -369,20 +358,24 @@ namespace Scada.Web.Code
                 Log.WriteError(ex, Locale.IsRussian ?
                     "Ошибка при приёме базы конфигурации, таблица {0}" :
                     "Error receiving the configuration database, the {0} table", tableName);
-                baseDataSet = null;
+                configBase = null;
                 return false;
+            }
+            finally
+            {
+                scadaClient.TerminateSession();
             }
         }
 
         /// <summary>
         /// Post-processes the received configuration database.
         /// </summary>
-        private static void PostprocessBase(BaseDataSet baseDataSet)
+        private static void PostprocessBase(ConfigBase configBase)
         {
             // duplicate channels for arrays and strings
             List<Cnl> duplicatedCnls = new();
 
-            foreach (Cnl cnl in baseDataSet.CnlTable.Enumerate())
+            foreach (Cnl cnl in configBase.CnlTable.Enumerate())
             {
                 if (cnl.IsArray() && cnl.IsArchivable())
                 {
@@ -408,7 +401,10 @@ namespace Scada.Web.Code
                 }
             }
 
-            duplicatedCnls.ForEach(cnl => baseDataSet.CnlTable.AddItem(cnl));
+            duplicatedCnls.ForEach(cnl => configBase.CnlTable.AddItem(cnl));
+
+            // initialize data objects
+            configBase.Init();
         }
 
         /// <summary>
@@ -436,9 +432,7 @@ namespace Scada.Web.Code
                             if (LoadAppConfig(out WebConfig webConfig))
                             {
                                 AppConfig = webConfig;
-                                PluginHolder = InitPlugins(webConfig);
-                                PluginHolder.LoadDictionaries();
-                                PluginHolder.LoadConfig();
+                                InitPlugins();
                             }
 
                             pluginsReady = true;
@@ -452,16 +446,14 @@ namespace Scada.Web.Code
                             {
                                 readBaseDT = utcNow;
 
-                                if (ReadBase(out BaseDataSet baseDataSet))
+                                if (ReadBase(out ConfigBase configBase))
                                 {
-                                    BaseDataSet = baseDataSet;
-                                    RightMatrix = new RightMatrix(baseDataSet);
-                                    Enums = new EnumDict(baseDataSet);
+                                    ConfigBase = configBase;
                                     IsReadyToLogin = true;
 
                                     if (IsReady)
                                     {
-                                        ResetCacheExpirationToken(); // after reading the configuration database
+                                        ResetCache(); // after reading the configuration database
                                         Log.WriteInfo(Locale.IsRussian ?
                                             "Приложение готово к входу пользователей" :
                                             "The application is ready for user login");
@@ -516,27 +508,6 @@ namespace Scada.Web.Code
             }
         }
 
-        /// <summary>
-        /// Cancels and renews the cache expiration token.
-        /// </summary>
-        private void ResetCacheExpirationToken()
-        {
-            try
-            {
-                CacheExpirationTokenSource.Cancel();
-            }
-            catch (Exception ex)
-            {
-                Log.WriteError(ex, Locale.IsRussian ?
-                    "Ошибка при очистке кэша" :
-                    "Error clearing memory cache");
-            }
-            finally
-            {
-                CacheExpirationTokenSource = new CancellationTokenSource();
-            }
-        }
-
 
         /// <summary>
         /// Initializes the application context.
@@ -553,11 +524,10 @@ namespace Scada.Web.Code
             };
 
             Log.WriteBreak();
-            LocalizeApp();
-
             Log.WriteAction(Locale.IsRussian ?
                 "Вебстанция {0} запущена" :
                 "Webstation {0} started", WebUtils.AppVersion);
+            LocalizeApp();
 
             if (InitStorage())
             {
@@ -635,7 +605,7 @@ namespace Scada.Web.Code
             }
             else
             {
-                ViewType viewType = BaseDataSet.ViewTypeTable.GetItem(viewEntity.ViewTypeID.Value);
+                ViewType viewType = ConfigBase.ViewTypeTable.GetItem(viewEntity.ViewTypeID.Value);
                 return viewType == null ? null : PluginHolder.GetViewSpecByCode(viewType.Code);
             }
         }
@@ -674,10 +644,24 @@ namespace Scada.Web.Code
         {
             if (configThread != null && !terminated)
             {
-                Log.WriteAction(Locale.IsRussian ?
-                    "Очистка кэша" :
-                    "Reset memory cache");
-                ResetCacheExpirationToken();
+                try
+                {
+                    Log.WriteAction(Locale.IsRussian ?
+                        "Очистка кэша" :
+                        "Reset memory cache");
+                    CacheExpirationTokenSource.Cancel();
+                    PluginHolder.ResetCache();
+                }
+                catch (Exception ex)
+                {
+                    Log.WriteError(ex, Locale.IsRussian ?
+                        "Ошибка при очистке кэша" :
+                        "Error clearing memory cache");
+                }
+                finally
+                {
+                    CacheExpirationTokenSource = new CancellationTokenSource();
+                }
             }
         }
     }

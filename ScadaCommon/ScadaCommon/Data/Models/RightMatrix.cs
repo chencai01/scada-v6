@@ -20,11 +20,12 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2020
- * Modified : 2021
+ * Modified : 2022
  */
 
 using Scada.Data.Entities;
 using Scada.Data.Tables;
+using Scada.Lang;
 using System;
 using System.Collections.Generic;
 
@@ -68,7 +69,7 @@ namespace Scada.Data.Models
         /// <summary>
         /// Enumerates parent role IDs recursively.
         /// </summary>
-        protected IEnumerable<int> EnumerateParentRoleIDs(TableIndex roleRef_childRoleIndex, int childRoleID,
+        protected IEnumerable<int> EnumerateParentRoleIDs(ITableIndex roleRef_childRoleIndex, int childRoleID,
             HashSet<int> protectionSet = null)
         {
             if (protectionSet == null)
@@ -92,7 +93,7 @@ namespace Scada.Data.Models
         /// <summary>
         /// Enumerates child objects recursively.
         /// </summary>
-        protected IEnumerable<Obj> EnumerateChildObjects(TableIndex obj_parentObjIndex, int parentObjNum,
+        protected IEnumerable<Obj> EnumerateChildObjects(ITableIndex obj_parentObjIndex, int parentObjNum,
             HashSet<int> protectionSet = null)
         {
             if (protectionSet == null)
@@ -115,7 +116,7 @@ namespace Scada.Data.Models
         /// <summary>
         /// Add rights for the specified role.
         /// </summary>
-        protected void AddRoleRight(TableIndex objRight_roleIndex, TableIndex obj_parentObjIndex,
+        protected void AddRoleRight(ITableIndex objRight_roleIndex, ITableIndex obj_parentObjIndex,
             RightByObj rightByObj, int roleID)
         {
             // explicitly defined rights have higher priority
@@ -157,15 +158,15 @@ namespace Scada.Data.Models
             // initialize rights matrix
             Matrix = new Dictionary<int, RightByObj>(baseDataSet.RoleTable.ItemCount);
 
-            // create indexes
-            TableIndex roleRef_childRoleIndex = new TableIndex("ChildRoleID", typeof(RoleRef));
-            roleRef_childRoleIndex.AddRangeToIndex(baseDataSet.RoleRefTable.Items);
+            // get indexes
+            if (!baseDataSet.RoleRefTable.TryGetIndex("ChildRoleID", out ITableIndex roleRef_childRoleIndex))
+                throw new ScadaException(CommonPhrases.IndexNotFound);
 
-            TableIndex objRight_roleIndex = new TableIndex("RoleID", typeof(ObjRight));
-            objRight_roleIndex.AddRangeToIndex(baseDataSet.ObjRightTable.Items);
+            if (!baseDataSet.ObjRightTable.TryGetIndex("RoleID", out ITableIndex objRight_roleIndex))
+                throw new ScadaException(CommonPhrases.IndexNotFound);
 
-            TableIndex obj_parentObjIndex = new TableIndex("ParentObjNum", typeof(Obj));
-            obj_parentObjIndex.AddRangeToIndex(baseDataSet.ObjTable.Items);
+            if (!baseDataSet.ObjTable.TryGetIndex("ParentObjNum", out ITableIndex obj_parentObjIndex))
+                throw new ScadaException(CommonPhrases.IndexNotFound);
 
             // fill rights
             foreach (Role role in baseDataSet.RoleTable.EnumerateItems())

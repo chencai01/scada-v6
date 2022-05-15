@@ -66,7 +66,7 @@ namespace Scada.Comm.Drivers.DrvOpcUa.Logic
         private readonly object opcLock;                      // synchronizes communication with OPC server
         private OpcDeviceConfig opcDeviceConfig;              // the device configuration
         private bool connected;                               // connection with OPC server is established
-        private DateTime connAttemptDT;                       // the time stamp of a connection attempt
+        private DateTime connAttemptDT;                       // the timestamp of a connection attempt
         private Session opcSession;                           // the OPC session
         private SessionReconnectHandler reconnectHandler;     // the object needed to reconnect
         private Dictionary<uint, SubscriptionTag> subscrByID; // the subscription tags accessed by IDs
@@ -96,7 +96,7 @@ namespace Scada.Comm.Drivers.DrvOpcUa.Logic
 
 
         /// <summary>
-        /// Initializes a command maps.
+        /// Initializes command maps.
         /// </summary>
         private void InitCmdMaps()
         {
@@ -118,7 +118,8 @@ namespace Scada.Comm.Drivers.DrvOpcUa.Logic
             {
                 foreach (ItemConfig itemConfig in subscriptionConfig.Items)
                 {
-                    if (itemConfig.Active && !string.IsNullOrEmpty(itemConfig.TagCode) && 
+                    if (itemConfig.Active && 
+                        !string.IsNullOrEmpty(itemConfig.TagCode) && 
                         !cmdByCode.ContainsKey(itemConfig.TagCode))
                     {
                         // created command based on item, having empty data type
@@ -296,10 +297,10 @@ namespace Scada.Comm.Drivers.DrvOpcUa.Logic
                 if (subscrByID != null &&
                     subscrByID.TryGetValue(e.Subscription.Id, out SubscriptionTag subscriptionTag))
                 {
-                    Log.WriteLine(Locale.IsRussian ?
-                        "{0} Устройство {1}. Обработка новых данных. Подписка: {2}" :
-                        "{0} Device {1}. Process new data. Subscription: {2}",
-                        LastSessionTime.ToLocalTime().ToLocalizedString(), DeviceNum, e.Subscription.DisplayName);
+                    Log.WriteAction(Locale.IsRussian ?
+                        "Устройство {0}. Обработка новых данных. Подписка: {1}" :
+                        "Device {0}. Process new data. Subscription: {1}",
+                        DeviceNum, e.Subscription.DisplayName);
                     ProcessDataChanges(subscriptionTag, e.NotificationMessage);
                     ProcessEvents(e.NotificationMessage);
                     LastRequestOK = true;
@@ -676,6 +677,9 @@ namespace Scada.Comm.Drivers.DrvOpcUa.Logic
         /// </summary>
         public override void InitDeviceTags()
         {
+            if (opcDeviceConfig == null)
+                return;
+
             foreach (SubscriptionConfig subscriptionConfig in opcDeviceConfig.Subscriptions)
             {
                 TagGroup tagGroup = new TagGroup(subscriptionConfig.DisplayName);
@@ -716,17 +720,17 @@ namespace Scada.Comm.Drivers.DrvOpcUa.Logic
             {
                 base.Session();
 
-                // delay before connection
+                // delay before connecting
                 DateTime utcNow = DateTime.UtcNow;
-                TimeSpan connectionDelay = ReconnectDelay - (utcNow - connAttemptDT);
+                TimeSpan connectDelay = ReconnectDelay - (utcNow - connAttemptDT);
 
-                if (connectionDelay > TimeSpan.Zero)
+                if (connectDelay > TimeSpan.Zero)
                 {
                     Log.WriteLine(Locale.IsRussian ?
                         "Задержка перед соединением {0} с" :
-                        "Delay before connection {0} sec", 
-                        connectionDelay.TotalSeconds.ToString("N1"));
-                    Thread.Sleep(connectionDelay);
+                        "Delay before connecting {0} sec", 
+                        connectDelay.TotalSeconds.ToString("N1"));
+                    Thread.Sleep(connectDelay);
                 }
 
                 // connect to OPC server and create subscriptions
@@ -735,7 +739,7 @@ namespace Scada.Comm.Drivers.DrvOpcUa.Logic
                 DeviceStatus = connected && CreateSubscriptions() ? DeviceStatus.Normal : DeviceStatus.Error;
             }
 
-            Thread.Sleep(PollingOptions.Delay);
+            SleepPollingDelay();
         }
 
         /// <summary>

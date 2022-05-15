@@ -20,7 +20,7 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2020
- * Modified : 2020
+ * Modified : 2022
  */
 
 using Scada.Comm.Devices;
@@ -49,6 +49,7 @@ namespace Scada.Comm.Engine
         public DeviceWrapper(DeviceLogic deviceLogic, ILog log)
         {
             DeviceLogic = deviceLogic ?? throw new ArgumentNullException(nameof(deviceLogic));
+            DeviceIndex = -1;
             InfoFileName = "";
             this.log = log ?? throw new ArgumentNullException(nameof(log));
         }
@@ -58,6 +59,11 @@ namespace Scada.Comm.Engine
         /// Gets the device logic.
         /// </summary>
         public DeviceLogic DeviceLogic { get; }
+
+        /// <summary>
+        /// Gets or sets the device index in the communication line devices.
+        /// </summary>
+        public int DeviceIndex { get; set; }
 
         /// <summary>
         /// Gets or sets the full file name to write device information.
@@ -103,7 +109,9 @@ namespace Scada.Comm.Engine
             try
             {
                 DeviceLogic.InitDeviceTags();
-                DeviceLogic.DeviceTags.AddStatusTag();
+
+                if (DeviceLogic.DeviceTags.UseStatusTag)
+                    DeviceLogic.DeviceTags.AddStatusTag();
             }
             catch (Exception ex)
             {

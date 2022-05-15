@@ -20,7 +20,7 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2006
- * Modified : 2021
+ * Modified : 2022
  */
 
 using Scada.Comm.Channels;
@@ -141,6 +141,17 @@ namespace Scada.Comm.Engine
         public IDictionary<string, object> SharedData { get; private set; }
 
         /// <summary>
+        /// Get the communication channel.
+        /// </summary>
+        public ChannelLogic Channel
+        {
+            get
+            {
+                return channel?.ChannelLogic;
+            }
+        }
+
+        /// <summary>
         /// Gets the current communication line status.
         /// </summary>
         public ServiceStatus LineStatus
@@ -172,6 +183,7 @@ namespace Scada.Comm.Engine
             {
                 DeviceWrapper deviceWrapper = new DeviceWrapper(deviceLogic, Log)
                 {
+                    DeviceIndex = devices.Count,
                     InfoFileName = Path.Combine(coreLogic.AppDirs.LogDir,
                         CommUtils.GetDeviceLogFileName(deviceLogic.DeviceNum, ".txt"))
                 };
@@ -257,6 +269,7 @@ namespace Scada.Comm.Engine
                 WriteInfo();
                 WriteDeviceInfo();
 
+                Log.WriteLine();
                 Log.WriteAction(Locale.IsRussian ?
                     "Линия связи {0} остановлена" :
                     "Communication line {0} is stopped", Title);
@@ -292,15 +305,15 @@ namespace Scada.Comm.Engine
         private void LineCycle()
         {
             int cycleDelay = Math.Max(MinCycleDelay, LineConfig.LineOptions.CycleDelay);
-            int deviceCnt = devices.Count;
+            int deviceCount = devices.Count;
             int deviceIndex = 0;
             int requiredSessionCnt = 0;
             int actualSessionCnt = 0;
             bool skipUnableMsg = false;
-            TimeSpan sendAllDataPeriod = TimeSpan.FromSeconds(coreLogic.AppConfig.GeneralOptions.SendAllDataPeriod);
-            bool sendAllDataAlways = !coreLogic.AppConfig.GeneralOptions.SendModifiedData;
-            bool sendAllDataWithPeriod = sendAllDataPeriod > TimeSpan.Zero;
-            DateTime sendAllDataDT = DateTime.MinValue;
+            TimeSpan sendAllPeriod = TimeSpan.FromSeconds(coreLogic.AppConfig.GeneralOptions.SendAllDataPeriod);
+            bool sendAllAlways = !coreLogic.AppConfig.GeneralOptions.SendModifiedData;
+            bool sendAllWithPeriod = sendAllPeriod > TimeSpan.Zero;
+            DateTime[] sendAllDT = new DateTime[deviceCount];
             DateTime writeInfoDT = DateTime.MinValue;
 
             while (!terminated)
@@ -340,12 +353,16 @@ namespace Scada.Comm.Engine
                     // session
                     deviceWrapper = SelectDevice(ref deviceIndex, out bool hasPriority);
                     deviceLogic = deviceWrapper.DeviceLogic;
-                    bool sendAllData = false;
-                    
-                    if (sendAllDataAlways || sendAllDataWithPeriod && (utcNow - sendAllDataDT >= sendAllDataPeriod))
+                    bool sendAll = false;
+
+                    if (sendAllAlways)
                     {
-                        sendAllData = true;
-                        sendAllDataDT = utcNow;
+                        sendAll = true;
+                    }
+                    else if (sendAllWithPeriod && (utcNow - sendAllDT[deviceWrapper.DeviceIndex] >= sendAllPeriod))
+                    {
+                        sendAll = true;
+                        sendAllDT[deviceWrapper.DeviceIndex] = utcNow;
                     }
 
                     if (hasPriority || CheckSessionIsRequired(deviceLogic, utcNow))
@@ -374,9 +391,9 @@ namespace Scada.Comm.Engine
                         }
 
                         channel.AfterSession(deviceLogic);
-                        TransferDeviceData(deviceLogic, sendAllData);
+                        TransferDeviceData(deviceLogic, sendAll);
                     }
-                    else if (sendAllData)
+                    else if (sendAll)
                     {
                         TransferDeviceData(deviceLogic, true);
                     }
@@ -389,7 +406,7 @@ namespace Scada.Comm.Engine
                         WriteDeviceInfo();
                     }
 
-                    if (deviceIndex >= deviceCnt)
+                    if (deviceIndex >= deviceCount)
                     {
                         // line cycle ended
                         if (actualSessionCnt > 0)
@@ -441,20 +458,24 @@ namespace Scada.Comm.Engine
                 {
                     if (utcNow - cmd.CreationTime > ScadaUtils.CommandLifetime)
                     {
+                        Log.WriteLine();
                         Log.WriteError(Locale.IsRussian ?
                             "Устаревшая команда для устройства {0} отклонена" :
                             "Outdated command to the device {0} is rejected", cmd.DeviceNum);
                     }
                     else if (!deviceMap.TryGetValue(cmd.DeviceNum, out deviceWrapper))
                     {
+                        Log.WriteLine();
                         Log.WriteError(Locale.IsRussian ?
                             "Команда с недопустимым устройством {0}, отклонена" :
                             "Command with invalid device {0} is rejected", cmd.DeviceNum);
-                    } else if (!deviceWrapper.DeviceLogic.CanSendCommands)
+                    } 
+                    else if (!deviceWrapper.DeviceLogic.CanSendCommands)
                     {
+                        Log.WriteLine();
                         Log.WriteError(Locale.IsRussian ?
                             "Устройство {0} не поддерживает отправку команд" :
-                            "The device {0} does not support sending commands");
+                            "The device {0} does not support sending commands", cmd.DeviceNum);
                     }
                     else
                     {
@@ -564,18 +585,20 @@ namespace Scada.Comm.Engine
         /// </summary>
         private void TransferDeviceData(DeviceLogic deviceLogic, bool allData)
         {
-            DeviceData deviceData = deviceLogic.DeviceData;
+            // current data
+            DeviceSlice currentSlice = deviceLogic.GetCurrentData(allData);
 
-            coreLogic.EnqueueCurrentData(allData ? 
-                deviceData.GetCurrentData() : 
-                deviceData.GetModifiedData());
+            if (!currentSlice.IsEmpty)
+                coreLogic.EnqueueCurrentData(currentSlice);
 
-            while (deviceData.DequeueSlice(out DeviceSlice deviceSlice))
+            // historical data
+            while (deviceLogic.DeviceData.DequeueSlice(out DeviceSlice historicalSlice))
             {
-                coreLogic.EnqueueHistoricalData(deviceSlice);
+                coreLogic.EnqueueHistoricalData(historicalSlice);
             }
 
-            while (deviceData.DequeueEvent(out DeviceEvent deviceEvent))
+            // events
+            while (deviceLogic.DeviceData.DequeueEvent(out DeviceEvent deviceEvent))
             {
                 coreLogic.EnqueueEvent(deviceEvent);
             }
@@ -844,11 +867,28 @@ namespace Scada.Comm.Engine
             // create devices
             foreach (DeviceConfig deviceConfig in lineConfig.DevicePolling)
             {
-                if (deviceConfig.Active && !coreLogic.DeviceExists(deviceConfig.DeviceNum) &&
-                    driverHolder.GetDriver(deviceConfig.Driver, out DriverLogic driverLogic))
+                if (deviceConfig.Active && !coreLogic.DeviceExists(deviceConfig.DeviceNum))
                 {
-                    DeviceLogic deviceLogic = driverLogic.CreateDevice(commLine, deviceConfig);
-                    commLine.AddDevice(deviceLogic);
+                    if (driverHolder.GetDriver(deviceConfig.Driver, out DriverLogic driverLogic))
+                    {
+                        DeviceLogic deviceLogic = driverLogic.CreateDevice(commLine, deviceConfig);
+
+                        if (deviceLogic == null)
+                        {
+                            throw new ScadaException(Locale.IsRussian ?
+                                "Не удалось создать устройство {0}." :
+                                "Unable to create device {0}.", CommUtils.GetDeviceTitle(deviceConfig));
+                        }
+
+                        commLine.AddDevice(deviceLogic);
+                    }
+                    else
+                    {
+                        throw new ScadaException(Locale.IsRussian ?
+                            "Драйвер {0} для устройства {1} не найден." :
+                            "Driver {0} for device {1} not found.",
+                            deviceConfig.Driver, CommUtils.GetDeviceTitle(deviceConfig));
+                    }
                 }
             }
 

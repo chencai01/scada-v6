@@ -37,7 +37,7 @@
   <Dictionary key="Scada.Admin.Extensions.ExtCommConfig.Controls.CtrlExtensionMenu">
     <Phrase key="miWizards">Мастеры</Phrase>
     <Phrase key="miAddLine">Добавить линию...</Phrase>
-    <Phrase key="miAddDevice">Добавить устройств...</Phrase>
+    <Phrase key="miAddDevice">Добавить устройство...</Phrase>
     <Phrase key="miCreateChannels">Создать каналы...</Phrase>
     <Phrase key="btnAddLine.ToolTip">Добавить линию</Phrase>
     <Phrase key="btnAddDevice.ToolTip">Добавить устройство</Phrase>
@@ -233,16 +233,8 @@
     <Phrase key="this">Драйверы</Phrase>
     <Phrase key="lblDrivers">Доступные драйверы:</Phrase>
     <Phrase key="btnProperties">Свойства</Phrase>
+    <Phrase key="btnRegister">Регистрация</Phrase>
     <Phrase key="lblDescr">Описание</Phrase>
-  </Dictionary>
-  <Dictionary key="Scada.Admin.Extensions.ExtCommConfig.Forms.FrmExtensionOptions">
-    <Phrase key="this">Параметры расширения</Phrase>
-    <Phrase key="lblMultiplicity">Кратность</Phrase>
-    <Phrase key="lblShift">Смещение</Phrase>
-    <Phrase key="lblGap">Промежуток</Phrase>
-    <Phrase key="chkPrependDeviceName">Добавлять наименование устройства</Phrase>
-    <Phrase key="btnOK">OK</Phrase>
-    <Phrase key="btnCancel">Отмена</Phrase>
   </Dictionary>
   <Dictionary key="Scada.Admin.Extensions.ExtCommConfig.Forms.FrmGeneralOptions">
     <Phrase key="this">Основные параметры</Phrase>
@@ -271,7 +263,7 @@
   <Dictionary key="Scada.Admin.Extensions.ExtCommConfig.Forms.FrmLineConfig">
     <Phrase key="lbTabs.Items[0]">Основные</Phrase>
     <Phrase key="lbTabs.Items[1]">Пользовательские</Phrase>
-    <Phrase key="lbTabs.Items[2]">Опрос устройства</Phrase>
+    <Phrase key="lbTabs.Items[2]">Опрос устройств</Phrase>
     <Phrase key="LineConfigTitle">Параметры линии {0}</Phrase>
   </Dictionary>
   <Dictionary key="Scada.Admin.Extensions.ExtCommConfig.Forms.FrmLineStats">

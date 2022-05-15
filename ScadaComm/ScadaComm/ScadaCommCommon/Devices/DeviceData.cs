@@ -20,7 +20,7 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2020
- * Modified : 2021
+ * Modified : 2022
  */
 
 using Scada.Data.Const;
@@ -267,7 +267,7 @@ namespace Scada.Comm.Devices
                                 return FormatEnum((int)doubleVal);
 
                             case TagFormatType.Date:
-                                DateTime dt = DateTime.FromOADate(doubleVal);
+                                DateTime dt = DateTime.FromOADate(doubleVal).ToLocalTime();
                                 return string.IsNullOrEmpty(tagFormat.Format) 
                                     ? dt.ToLocalizedString() 
                                     : dt.ToString(tagFormat.Format);
@@ -716,6 +716,9 @@ namespace Scada.Comm.Devices
         /// </summary>
         public DeviceSlice GetCurrentData()
         {
+            if (deviceTags.Count == 0)
+                return DeviceSlice.Empty;
+
             lock (curDataLock)
             {
                 DeviceSlice deviceSlice = new DeviceSlice(DateTime.UtcNow, deviceTags.Count, rawData.Length)
@@ -749,6 +752,9 @@ namespace Scada.Comm.Devices
         /// </summary>
         public DeviceSlice GetModifiedData()
         {
+            if (deviceTags.Count == 0)
+                return DeviceSlice.Empty;
+
             lock (curDataLock)
             {
                 int tagCount = 0;   // number of modified tags
@@ -762,6 +768,9 @@ namespace Scada.Comm.Devices
                         dataLength += deviceTag.DataLength;
                     }
                 }
+
+                if (tagCount == 0)
+                    return DeviceSlice.Empty;
 
                 DeviceSlice deviceSlice = new DeviceSlice(DateTime.UtcNow, tagCount, dataLength)
                 {

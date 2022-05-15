@@ -24,8 +24,10 @@
  */
 
 using Scada.Admin.Lang;
+using Scada.Data.Entities;
 using Scada.Data.Models;
 using Scada.Data.Tables;
+using Scada.Lang;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -65,6 +67,7 @@ namespace Scada.Admin.Project
         {
             BaseDir = "";
             Loaded = false;
+            AddIndexes();
         }
 
 
@@ -87,6 +90,80 @@ namespace Scada.Admin.Project
             {
                 return AllTables.Any(t => t.Modified);
             }
+        }
+
+
+        /// <summary>
+        /// Adds the necessary indexes to the tables.
+        /// </summary>
+        private void AddIndexes()
+        {
+            FormatTable.AddIndex("Code");
+            QuantityTable.AddIndex("Code");
+            UnitTable.AddIndex("Code");
+        }
+
+        /// <summary>
+        /// Gets the item with the specified code from the table.
+        /// </summary>
+        private static T GetItemByCode<T>(IBaseTable baseTable, string code)
+        {
+            if (string.IsNullOrEmpty(code))
+            {
+                return default;
+            }
+            else if (baseTable.TryGetIndex("Code", out ITableIndex index))
+            {
+                foreach (object item in index.SelectItems(code))
+                {
+                    return (T)item;
+                }
+
+                return default;
+            }
+            else
+            {
+                throw new ScadaException(CommonPhrases.IndexNotFound);
+            }
+        }
+
+
+        /// <summary>
+        /// Gets the format with the specified code, or null if it not found.
+        /// </summary>
+        public Format GetFormatByCode(string code)
+        {
+            return GetItemByCode<Format>(FormatTable, code);
+        }
+
+        /// <summary>
+        /// Gets the quantity with the specified code, or null if it not found.
+        /// </summary>
+        public Quantity GetQuantityByCode(string code)
+        {
+            return GetItemByCode<Quantity>(QuantityTable, code);
+        }
+
+        /// <summary>
+        /// Gets the quantity with the specified code, or null if it not found.
+        /// </summary>
+        public Unit GetUnitByCode(string code)
+        {
+            return GetItemByCode<Unit>(UnitTable, code);
+        }
+
+        /// <summary>
+        /// Gets the table of the configuration database by the specified item type.
+        /// </summary>
+        public IBaseTable GetTable(Type itemType)
+        {
+            foreach (IBaseTable baseTable in AllTables)
+            {
+                if (baseTable.ItemType == itemType)
+                    return baseTable;
+            }
+
+            return null;
         }
 
 

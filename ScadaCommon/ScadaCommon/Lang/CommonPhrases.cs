@@ -20,7 +20,7 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2015
- * Modified : 2021
+ * Modified : 2022
  */
 
 #pragma warning disable 1591 // Missing XML comment for publicly visible type or member
@@ -87,13 +87,11 @@ namespace Scada.Lang
         public static string FileNotFound { get; private set; }
         public static string NamedFileNotFound { get; private set; }
         public static string DirectoryNotExists { get; private set; }
-        public static string StateFileNotExists { get; private set; }
         public static string PathNotSupported { get; private set; }
         public static string InvalidFileFormat { get; private set; }
         public static string LoadConfigError { get; private set; }
         public static string SaveConfigError { get; private set; }
-        public static string LoadStateError { get; private set; }
-        public static string SaveStateError { get; private set; }
+        public static string SaveConfigConfirm { get; private set; }
         public static string LoadViewError { get; private set; }
         public static string SaveViewError { get; private set; }
 
@@ -127,6 +125,12 @@ namespace Scada.Lang
         public static string NewConnection { get; private set; }
         public static string UnnamedConnection { get; private set; }
         public static string XmlFileFilter { get; private set; }
+
+        // Scada.ComponentModel
+        public static string TrueValue { get; private set; }
+        public static string FalseValue { get; private set; }
+        public static string EmptyValue { get; private set; }
+        public static string CollectionValue { get; private set; }
 
         // Scada.CnlDataFormatter
         public static string CommandDescrPrefix { get; private set; }
@@ -207,13 +211,11 @@ namespace Scada.Lang
             FileNotFound = dict["FileNotFound"];
             NamedFileNotFound = dict["NamedFileNotFound"];
             DirectoryNotExists = dict["DirectoryNotExists"];
-            StateFileNotExists = dict["StateFileNotExists"];
             PathNotSupported = dict["PathNotSupported"];
             InvalidFileFormat = dict["InvalidFileFormat"];
             LoadConfigError = dict["LoadConfigError"];
             SaveConfigError = dict["SaveConfigError"];
-            LoadStateError = dict["LoadStateError"];
-            SaveStateError = dict["SaveStateError"];
+            SaveConfigConfirm = dict["SaveConfigConfirm"];
             LoadViewError = dict["LoadViewError"];
             SaveViewError = dict["SaveViewError"];
 
@@ -247,6 +249,12 @@ namespace Scada.Lang
             NewConnection = dict["NewConnection"];
             UnnamedConnection = dict["UnnamedConnection"];
             XmlFileFilter = dict["XmlFileFilter"];
+
+            dict = Locale.GetDictionary("Scada.ComponentModel");
+            TrueValue = dict["TrueValue"];
+            FalseValue = dict["FalseValue"];
+            EmptyValue = dict["EmptyValue"];
+            CollectionValue = dict["CollectionValue"];
 
             dict = Locale.GetDictionary("Scada.CnlDataFormatter");
             CommandDescrPrefix = dict["CommandDescrPrefix"];

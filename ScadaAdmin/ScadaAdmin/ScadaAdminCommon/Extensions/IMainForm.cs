@@ -20,7 +20,7 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2021
- * Modified : 2021
+ * Modified : 2022
  */
 
 using Scada.Agent;
@@ -74,7 +74,7 @@ namespace Scada.Admin.Extensions
         /// <summary>
         /// Refreshes child forms that contains a configuration database table with the specified item type.
         /// </summary>
-        void RefreshBaseTables(Type itemType);
+        void RefreshBaseTables(Type itemType, bool saveChanges);
 
         /// <summary>
         /// Finds a tree node that represents a configuration database table.

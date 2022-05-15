@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ScadaDictionaries>
+  <!-- ScadaCommon.dll -->
   <Dictionary key="Scada.Application">
     <Phrase key="ProductName">Rapid SCADA</Phrase>
     <Phrase key="ServerAppName">Server</Phrase>
@@ -54,13 +55,11 @@
     <Phrase key="FileNotFound">File not found.</Phrase>
     <Phrase key="NamedFileNotFound">File {0} not found.</Phrase>
     <Phrase key="DirectoryNotExists">Directory does not exist.</Phrase>
-    <Phrase key="StateFileNotExists">State file is missing or outdated</Phrase>
     <Phrase key="PathNotSupported">Path not supported.</Phrase>
     <Phrase key="InvalidFileFormat">Invalid file format.</Phrase>
     <Phrase key="LoadConfigError">Error loading configuration</Phrase>
     <Phrase key="SaveConfigError">Error saving configuration</Phrase>
-    <Phrase key="LoadStateError">Error loading state</Phrase>
-    <Phrase key="SaveStateError">Error saving state</Phrase>
+    <Phrase key="SaveConfigConfirm">Configuration has been modified. Save the changes?</Phrase>
     <Phrase key="LoadViewError">Error loading view</Phrase>
     <Phrase key="SaveViewError">Error saving view</Phrase>
   </Dictionary>
@@ -95,7 +94,18 @@
     <Phrase key="UnnamedConnection">&lt;Unnamed Connection&gt;</Phrase>
     <Phrase key="XmlFileFilter">XML Files (*.xml)|*.xml|All Files (*.*)|*.*</Phrase>
   </Dictionary>
-  <Dictionary key="Scada.Forms.CtrlClientConnection">
+  <Dictionary key="Scada.ComponentModel">
+    <Phrase key="TrueValue">Yes</Phrase>
+    <Phrase key="FalseValue">No</Phrase>
+    <Phrase key="EmptyValue">(None)</Phrase>
+    <Phrase key="CollectionValue">(Collection)</Phrase>
+  </Dictionary>
+  <Dictionary key="Scada.CnlDataFormatter">
+    <Phrase key="CommandDescrPrefix">Command: </Phrase>
+    <Phrase key="StatusFormat">Status {0}</Phrase>
+  </Dictionary>
+  <!-- ScadaCommon.Forms.dll -->
+  <Dictionary key="Scada.Forms.Controls.CtrlClientConnection">
     <Phrase key="gbConnectionOptions">Connection Options</Phrase>
     <Phrase key="lblName">Name</Phrase>
     <Phrase key="lblHost">Host</Phrase>
@@ -107,7 +117,7 @@
     <Phrase key="lblSecretKey">Secret key</Phrase>
     <Phrase key="btnPaste">Paste</Phrase>
   </Dictionary>
-  <Dictionary key="Scada.Forms.CtrlDbConnection">
+  <Dictionary key="Scada.Forms.Controls.CtrlDbConnection">
     <Phrase key="gbConnectionOptions">Connection Options</Phrase>
     <Phrase key="lblName">Name</Phrase>
     <Phrase key="lblDbms">DBMS</Phrase>
@@ -117,7 +127,7 @@
     <Phrase key="lblPassword">Password</Phrase>
     <Phrase key="chkConnectionString">Connection string</Phrase>
   </Dictionary>
-  <Dictionary key="Scada.Forms.FrmCnlSelect">
+  <Dictionary key="Scada.Forms.Forms.FrmCnlSelect">
     <Phrase key="this">Select Channels</Phrase>
     <Phrase key="lblFilter">Filter</Phrase>
     <Phrase key="btnApplyFilter">Apply</Phrase>
@@ -130,7 +140,7 @@
     <Phrase key="btnSelect">Select</Phrase>
     <Phrase key="btnCancel">Cancel</Phrase>
   </Dictionary>
-  <Dictionary key="Scada.Forms.FrmEntitySelect">
+  <Dictionary key="Scada.Forms.Forms.FrmEntitySelect">
     <Phrase key="this">Select from {0}</Phrase>
     <Phrase key="lblFilter">Filter</Phrase>
     <Phrase key="btnApplyFilter">Apply</Phrase>
@@ -143,13 +153,20 @@
     <Phrase key="btnSelect">Select</Phrase>
     <Phrase key="btnCancel">Cancel</Phrase>
   </Dictionary>
-  <Dictionary key="Scada.Forms.FrmOptions">
+  <Dictionary key="Scada.Forms.Forms.FrmModuleConfig">
+    <Phrase key="this">Module Configuration</Phrase>
+    <Phrase key="btnAdd.ToolTip">Add</Phrase>
+    <Phrase key="btnMoveUp.ToolTip">Move Up</Phrase>
+    <Phrase key="btnMoveDown.ToolTip">Move Down</Phrase>
+    <Phrase key="btnDelete.ToolTip">Delete</Phrase>
+    <Phrase key="btnSave">Save</Phrase>
+    <Phrase key="btnCancel">Cancel</Phrase>
+    <Phrase key="btnClose">Close</Phrase>
+    <Phrase key="miCollapseAll">Collapse All</Phrase>
+  </Dictionary>
+  <Dictionary key="Scada.Forms.Forms.FrmOptions">
     <Phrase key="this">Options</Phrase>
     <Phrase key="btnOK">OK</Phrase>
     <Phrase key="btnCancel">Cancel</Phrase>
-  </Dictionary>
-  <Dictionary key="Scada.CnlDataFormatter">
-    <Phrase key="CommandDescrPrefix">Command: </Phrase>
-    <Phrase key="StatusFormat">Status {0}</Phrase>
   </Dictionary>
 </ScadaDictionaries>

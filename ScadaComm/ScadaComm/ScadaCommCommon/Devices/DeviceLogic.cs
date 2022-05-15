@@ -20,7 +20,7 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2006
- * Modified : 2021
+ * Modified : 2022
  */
 
 using Scada.Comm.Channels;
@@ -254,8 +254,7 @@ namespace Scada.Comm.Devices
         /// </summary>
         protected void FinishRequest()
         {
-            Thread.Sleep(PollingOptions.Delay);
-
+            SleepPollingDelay();
             DeviceStats.RequestCount++;
 
             if (!LastRequestOK)
@@ -308,6 +307,15 @@ namespace Scada.Comm.Devices
             }
 
             DeviceData.SetStatusTag(DeviceStatus);
+        }
+
+        /// <summary>
+        /// Suspends for the delay specified in the polling options.
+        /// </summary>
+        protected void SleepPollingDelay()
+        {
+            if (PollingOptions.Delay > 0)
+                Thread.Sleep(PollingOptions.Delay);
         }
 
         /// <summary>
@@ -386,13 +394,23 @@ namespace Scada.Comm.Devices
         {
             DeviceData.Init(DeviceTags);
         }
-        
+
         /// <summary>
         /// Sets the current data to undefined.
         /// </summary>
         public virtual void InvalidateData()
         {
             DeviceData.Invalidate();
+        }
+
+        /// <summary>
+        /// Gets a slice of the current data to transfer.
+        /// </summary>
+        public virtual DeviceSlice GetCurrentData(bool allData)
+        {
+            return allData 
+                ? DeviceData.GetCurrentData() 
+                : DeviceData.GetModifiedData();
         }
 
         /// <summary>
@@ -450,7 +468,7 @@ namespace Scada.Comm.Devices
 
             string TimeToStringRu(DateTime dateTime)
             {
-                return dateTime > DateTime.MinValue ? dateTime.ToLocalTime().ToLocalizedString() : "неопределено";
+                return dateTime > DateTime.MinValue ? dateTime.ToLocalTime().ToLocalizedString() : "не определено";
             };
 
             string TimeToStringEn(DateTime dateTime)
@@ -466,7 +484,7 @@ namespace Scada.Comm.Devices
             if (Locale.IsRussian)
             {
                 sb.Append("Драйвер       : ").AppendLine(DriverName);
-                sb.Append("Состояние     : ").AppendLine(DeviceStatus.ToString(true));
+                sb.Append("Статус        : ").AppendLine(DeviceStatus.ToString(true));
                 sb.Append("Время сеанса  : ").AppendLine(TimeToStringRu(LastSessionTime));
                 sb.Append("Время команды : ").AppendLine(TimeToStringRu(LastCommandTime));
                 sb.AppendLine();

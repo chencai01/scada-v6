@@ -55,6 +55,7 @@ namespace Scada.Comm.Lang
         public static string UnableFindDevice { get; private set; }
 
         // Devices
+        public static string DeviceMessage { get; private set; }
         public static string ResponseOK { get; private set; }
         public static string ResponseError { get; private set; }
         public static string ResponseCsError { get; private set; }
@@ -66,6 +67,7 @@ namespace Scada.Comm.Lang
 
         // Drivers
         public static string DriverMessage { get; private set; }
+        public static string SharedObject { get; private set; }
 
         // Scada.Comm.Devices
         public static string LoadDeviceConfigError { get; private set; }
@@ -98,6 +100,7 @@ namespace Scada.Comm.Lang
                 WriteLineError = "Ошибка при записи строки";
                 UnableFindDevice = "Не удалось найти ни одного устройства с адресом {0}";
 
+                DeviceMessage = "Устройство {0}: {1}";
                 ResponseOK = "OK";
                 ResponseError = "Ошибка связи";
                 ResponseCsError = "Ошибка КС";
@@ -108,6 +111,7 @@ namespace Scada.Comm.Lang
                 On = "Вкл";
 
                 DriverMessage = "Драйвер {0}: {1}";
+                SharedObject = "<Объект>";
             }
             else
             {
@@ -127,6 +131,7 @@ namespace Scada.Comm.Lang
                 WriteLineError = "Error writing line";
                 UnableFindDevice = "Unable to find any device with address {0}";
 
+                DeviceMessage = "Device {0}: {1}";
                 ResponseOK = "OK";
                 ResponseError = "Error: communication failed";
                 ResponseCsError = "Error: invalid checksum";
@@ -137,6 +142,7 @@ namespace Scada.Comm.Lang
                 On = "On";
 
                 DriverMessage = "Driver {0}: {1}";
+                SharedObject = "<Object>";
             }
 
 

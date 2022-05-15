@@ -20,7 +20,7 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2020
- * Modified : 2020
+ * Modified : 2022
  */
 
 namespace Scada.Comm.Channels
@@ -39,6 +39,11 @@ namespace Scada.Comm.Channels
         /// <summary>
         /// Waits for data.
         /// </summary>
-        Slave
+        Slave,
+
+        /// <summary>
+        /// Non-standard behavior.
+        /// </summary>
+        Mixed
     }
 }

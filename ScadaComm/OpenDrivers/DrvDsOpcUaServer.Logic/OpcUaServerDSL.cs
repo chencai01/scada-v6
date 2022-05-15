@@ -1,27 +1,5 @@
-﻿/*
- * Copyright 2021 Rapid Software LLC
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * 
- * 
- * Product  : Rapid SCADA
- * Module   : DrvDsOpcUaServer
- * Summary  : Implements the data source logic
- * 
- * Author   : Mikhail Shiryaev
- * Created  : 2021
- * Modified : 2021
- */
+﻿// Copyright (c) Rapid Software LLC. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Opc.Ua;
 using Opc.Ua.Configuration;
@@ -32,11 +10,8 @@ using Scada.Comm.Devices;
 using Scada.Lang;
 using Scada.Log;
 using Scada.Storages;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -132,7 +107,9 @@ namespace Scada.Comm.Drivers.DrvDsOpcUaServer.Logic
         {
             await opcApp.Start(opcServer);
 
-            StringBuilder sbStartInfo = new StringBuilder("OPC UA server started");
+            StringBuilder sbStartInfo = new StringBuilder(Locale.IsRussian ? 
+                "Сервер OPC UA запущен" :
+                "OPC UA server started");
             EndpointDescriptionCollection endpoints = opcServer.GetEndpoints();
 
             if (endpoints.Count > 0)
@@ -169,7 +146,9 @@ namespace Scada.Comm.Drivers.DrvDsOpcUaServer.Logic
             if (opcServer != null)
             {
                 opcServer.Stop();
-                dsLog.WriteAction("OPC UA server stopped");
+                dsLog.WriteAction(Locale.IsRussian ?
+                    "Сервер OPC UA остановлен" :
+                    "OPC UA server stopped");
             }
         }
 

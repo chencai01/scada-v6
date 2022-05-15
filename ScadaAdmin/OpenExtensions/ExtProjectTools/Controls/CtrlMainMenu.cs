@@ -4,7 +4,6 @@
 using Scada.Admin.Extensions.ExtProjectTools.Code;
 using Scada.Admin.Extensions.ExtProjectTools.Forms;
 using Scada.Data.Entities;
-using Scada.Forms;
 using System;
 using System.IO;
 using System.Windows.Forms;
@@ -79,6 +78,18 @@ namespace Scada.Admin.Extensions.ExtProjectTools.Controls
             }
         }
 
+        /// <summary>
+        /// Generates a device map.
+        /// </summary>
+        private void GenerateDeviceMap()
+        {
+            if (adminContext.CurrentProject != null)
+            {
+                new DeviceMap(adminContext.ErrLog, adminContext.CurrentProject.ConfigBase)
+                    .Generate(Path.Combine(adminContext.AppDirs.LogDir, DeviceMap.MapFileName));
+            }
+        }
+
         private void AdminContext_CurrentProjectChanged(object sender, EventArgs e)
         {
             SetMenuItemsEnabled();
@@ -86,8 +97,10 @@ namespace Scada.Admin.Extensions.ExtProjectTools.Controls
 
         private void AdminContext_MessageToExtension(object sender, MessageEventArgs e)
         {
-            if (e.Message == "ExtProjectTools.GenerateChannelMap")
+            if (e.Message == KnownExtensionMessage.GenerateChannelMap)
                 GenerateChannelMap((bool)e.Arguments["GroupByDevices"]);
+            else if (e.Message == KnownExtensionMessage.GenerateDeviceMap)
+                GenerateDeviceMap();
         }
 
         private void miCloneChannels_Click(object sender, EventArgs e)
@@ -99,13 +112,18 @@ namespace Scada.Admin.Extensions.ExtProjectTools.Controls
                 frmCnlClone.ShowDialog();
 
                 if (frmCnlClone.ChannelsCloned)
-                    adminContext.MainForm.RefreshBaseTables(typeof(Cnl));
+                    adminContext.MainForm.RefreshBaseTables(typeof(Cnl), true);
             }
         }
 
         private void miChannelMap_Click(object sender, EventArgs e)
         {
             GenerateChannelMap(sender == miChannelMapByDevice);
+        }
+
+        private void miDeviceMap_Click(object sender, EventArgs e)
+        {
+            GenerateDeviceMap();
         }
 
         private void miCheckIntegrity_Click(object sender, EventArgs e)
@@ -129,7 +147,7 @@ namespace Scada.Admin.Extensions.ExtProjectTools.Controls
                 };
 
                 if (frmTableImport.ShowDialog() == DialogResult.OK)
-                    adminContext.MainForm.RefreshBaseTables(frmTableImport.SelectedItemType);
+                    adminContext.MainForm.RefreshBaseTables(frmTableImport.SelectedItemType, true);
             }
         }
 

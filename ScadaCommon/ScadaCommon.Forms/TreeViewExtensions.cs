@@ -47,7 +47,11 @@ namespace Scada.Forms
         /// </summary>
         public static void SetImageKey(this TreeNode treeNode, string imageKey)
         {
-            treeNode.ImageKey = treeNode.SelectedImageKey = imageKey;
+            if (treeNode.ImageKey != imageKey)
+                treeNode.ImageKey = imageKey;
+
+            if (treeNode.SelectedImageKey != imageKey)
+                treeNode.SelectedImageKey = imageKey;
         }
 
         /// <summary>
@@ -589,10 +593,8 @@ namespace Scada.Forms
         /// <summary>
         /// Checks that moving up the selected tree node is possible.
         /// </summary>
-        public static bool MoveUpSelectedNodeIsEnabled(this TreeView treeView, TreeNodeBehavior moveBehavior)
+        public static bool MoveUpIsEnabled(TreeNode selectedNode, TreeNodeBehavior moveBehavior)
         {
-            TreeNode selectedNode = treeView.SelectedNode;
-
             if (selectedNode == null)
             {
                 return false;
@@ -621,10 +623,8 @@ namespace Scada.Forms
         /// <summary>
         /// Checks that moving down the selected tree node is possible.
         /// </summary>
-        public static bool MoveDownSelectedNodeIsEnabled(this TreeView treeView, TreeNodeBehavior moveBehavior)
+        public static bool MoveDownIsEnabled(TreeNode selectedNode, TreeNodeBehavior moveBehavior)
         {
-            TreeNode selectedNode = treeView.SelectedNode;
-
             if (selectedNode == null)
             {
                 return false;
@@ -648,6 +648,22 @@ namespace Scada.Forms
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Checks that moving up the selected tree node is possible.
+        /// </summary>
+        public static bool MoveUpSelectedNodeIsEnabled(this TreeView treeView, TreeNodeBehavior moveBehavior)
+        {
+            return MoveUpIsEnabled(treeView.SelectedNode, moveBehavior);
+        }
+
+        /// <summary>
+        /// Checks that moving down the selected tree node is possible.
+        /// </summary>
+        public static bool MoveDownSelectedNodeIsEnabled(this TreeView treeView, TreeNodeBehavior moveBehavior)
+        {
+            return MoveDownIsEnabled(treeView.SelectedNode, moveBehavior);
         }
     }
 }

@@ -19,6 +19,19 @@ namespace Scada
         private static readonly NumberFormatInfo CommaNfi = new NumberFormatInfo { NumberDecimalSeparator = "," };
 
         /// <summary>
+        /// The number of milliseconds in 1 minute.
+        /// </summary>
+        public const int MsPerMin = 60 * 1000;
+        /// <summary>
+        /// The number of milliseconds in 1 hour.
+        /// </summary>
+        public const int MsPerHour = 60 * MsPerMin;
+        /// <summary>
+        /// The number of milliseconds in 1 day.
+        /// </summary>
+        public const int MsPerDay = 24 * MsPerMin;
+
+        /// <summary>
         /// The service status names in English.
         /// </summary>
         private static readonly string[] ServiceStatusNamesEn = 
@@ -226,6 +239,22 @@ namespace Scada
         }
 
         /// <summary>
+        /// Converts the number of milliseconds to a date and time.
+        /// </summary>
+        public static DateTime MillisecondsToTime(long milliseconds)
+        {
+            return DateTimeOffset.FromUnixTimeMilliseconds(milliseconds).UtcDateTime;
+        }
+
+        /// <summary>
+        /// Gets the number of milliseconds since 1970-01-01.
+        /// </summary>
+        public static long GetUnixMilliseconds(this DateTime dateTime)
+        {
+            return new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
+        }
+
+        /// <summary>
         /// Gets the application name.
         /// </summary>
         public static string GetAppName(ServiceApp serviceApp)
@@ -275,7 +304,7 @@ namespace Scada
         /// </summary>
         public static string ToLowerString(this bool b)
         {
-            return b.ToString().ToLowerInvariant();
+            return b ? "true" : "false";
         }
 
         /// <summary>

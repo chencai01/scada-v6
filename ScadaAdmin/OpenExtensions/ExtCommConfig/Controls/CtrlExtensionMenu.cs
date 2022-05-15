@@ -21,8 +21,8 @@ using WinControl;
 namespace Scada.Admin.Extensions.ExtCommConfig.Controls
 {
     /// <summary>
-    /// Represents a control that contains menus of the extension.
-    /// <para>Представляет элемент управления, содержащий меню расширения.</para>
+    /// Represents a control that provides extension menus.
+    /// <para>Представляет элемент управления, предоставляющий меню расширения.</para>
     /// </summary>
     public partial class CtrlExtensionMenu : UserControl
     {
@@ -49,6 +49,7 @@ namespace Scada.Admin.Extensions.ExtCommConfig.Controls
 
             SetMenuItemsEnabled();
             adminContext.CurrentProjectChanged += AdminContext_CurrentProjectChanged;
+            adminContext.MessageToExtension += AdminContext_MessageToExtension;
         }
 
 
@@ -129,6 +130,27 @@ namespace Scada.Admin.Extensions.ExtCommConfig.Controls
         }
 
         /// <summary>
+        /// Updates the specified communication line node.
+        /// </summary>
+        private void UpdateLineNode(string instanceName, int commLineNum)
+        {
+            if (adminContext.MainForm.FindInstanceNode(instanceName, out bool justPrepared) is TreeNode instanceNode &&
+                !justPrepared && instanceNode.FindFirst(CommNodeType.Lines) is TreeNode linesNode)
+            {
+                foreach (TreeNode lineNode in linesNode.Nodes)
+                {
+                    if (lineNode.GetRelatedObject() is LineConfig lineConfig &&
+                        lineConfig.CommLineNum == commLineNum)
+                    {
+                        adminContext.MainForm.CloseChildForms(lineNode, false);
+                        new TreeViewBuilder(adminContext, this).UpdateLineNode(lineNode);
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Finds a tree node that contains the specified related object.
         /// </summary>
         private static TreeNode FindNode(TreeNode startNode, object relatedObject)
@@ -162,8 +184,19 @@ namespace Scada.Admin.Extensions.ExtCommConfig.Controls
 
         private void AdminContext_CurrentProjectChanged(object sender, EventArgs e)
         {
+            ExtensionUtils.ResetDriverViewCache();
             SetMenuItemsEnabled();
             recentSelection.Reset();
+        }
+
+        private void AdminContext_MessageToExtension(object sender, MessageEventArgs e)
+        {
+            if (e.Message == KnownExtensionMessage.UpdateLineNode)
+            {
+                UpdateLineNode(
+                    (string)e.Arguments["InstanceName"],
+                    (int)e.Arguments["CommLineNum"]);
+            }
         }
 
         private void miAddLine_Click(object sender, EventArgs e)
@@ -175,7 +208,7 @@ namespace Scada.Admin.Extensions.ExtCommConfig.Controls
 
                 if (frmLineAdd.ShowDialog() == DialogResult.OK)
                 {
-                    adminContext.MainForm.RefreshBaseTables(typeof(CommLine));
+                    adminContext.MainForm.RefreshBaseTables(typeof(CommLine), true);
 
                     if (frmLineAdd.AddedToComm)
                     {
@@ -212,7 +245,7 @@ namespace Scada.Admin.Extensions.ExtCommConfig.Controls
 
                 if (frmDeviceAdd.ShowDialog() == DialogResult.OK)
                 {
-                    adminContext.MainForm.RefreshBaseTables(typeof(Device));
+                    adminContext.MainForm.RefreshBaseTables(typeof(Device), true);
 
                     if (frmDeviceAdd.AddedToComm)
                     {
@@ -249,7 +282,7 @@ namespace Scada.Admin.Extensions.ExtCommConfig.Controls
                 FrmCnlCreate frmCnlCreate = new(adminContext, adminContext.CurrentProject, recentSelection);
 
                 if (frmCnlCreate.ShowDialog() == DialogResult.OK)
-                    adminContext.MainForm.RefreshBaseTables(typeof(Cnl));
+                    adminContext.MainForm.RefreshBaseTables(typeof(Cnl), true);
             }
         }
 
@@ -312,8 +345,8 @@ namespace Scada.Admin.Extensions.ExtCommConfig.Controls
                     else
                     {
                         // refresh open tables
-                        adminContext.MainForm.RefreshBaseTables(typeof(CommLine));
-                        adminContext.MainForm.RefreshBaseTables(typeof(Device));
+                        adminContext.MainForm.RefreshBaseTables(typeof(CommLine), true);
+                        adminContext.MainForm.RefreshBaseTables(typeof(Device), true);
                     }
                 };
             }
