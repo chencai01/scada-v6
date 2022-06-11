@@ -20,7 +20,7 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2021
- * Modified : 2021
+ * Modified : 2022
  */
 
 using Microsoft.AspNetCore.Http;
@@ -46,7 +46,7 @@ namespace Scada.Web.Code
         /// </summary>
         private static UserContext CreateUserContext(int userID, IWebContext webContext)
         {
-            User userEntity = webContext.ConfigBase.UserTable.GetItem(userID) ?? 
+            User userEntity = webContext.ConfigDatabase.UserTable.GetItem(userID) ?? 
                 webContext.PluginHolder.FindUser(userID);
 
             if (userEntity == null)
@@ -59,7 +59,8 @@ namespace Scada.Web.Code
             else
             {
                 UserContext userContext = new() { UserEntity = userEntity };
-                userContext.Rights.Init(webContext.ConfigBase.RightMatrix, userEntity.RoleID);
+                userContext.Rights.Init(webContext.ConfigDatabase.RightMatrix, userEntity.RoleID);
+                userContext.Objects.Init(webContext.ConfigDatabase.ObjTable, userContext.Rights);
                 userContext.Menu.Init(webContext, userEntity, userContext.Rights);
                 userContext.Views.Init(webContext, userContext.Rights);
 

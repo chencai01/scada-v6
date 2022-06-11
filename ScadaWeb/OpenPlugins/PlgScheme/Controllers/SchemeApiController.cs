@@ -51,7 +51,7 @@ namespace Scada.Web.Plugins.PlgScheme.Controllers
                 if (viewLoader.GetView(viewID, out SchemeView schemeView, out string errMsg))
                 {
                     DocumentPacket documentPacket = new(schemeView);
-                    documentPacket.FillCnlProps(webContext.ConfigBase);
+                    documentPacket.FillCnlProps(webContext.ConfigDatabase);
                     return Dto<DocumentPacket>.Success(documentPacket);
                 }
                 else
@@ -129,7 +129,7 @@ namespace Scada.Web.Plugins.PlgScheme.Controllers
                     {
                         errMsg = WebPhrases.CommandsDisabled;
                     }
-                    else if (webContext.ConfigBase.CnlTable.GetItem(ctrlCnlNum) is not Cnl cnl)
+                    else if (webContext.ConfigDatabase.CnlTable.GetItem(ctrlCnlNum) is not Cnl cnl)
                     {
                         errMsg = string.Format(WebPhrases.CnlNotFound, ctrlCnlNum);
                     }
@@ -137,9 +137,9 @@ namespace Scada.Web.Plugins.PlgScheme.Controllers
                     {
                         errMsg = string.Format(WebPhrases.CnlNotOutput, ctrlCnlNum);
                     }
-                    else if (!(userContext.Rights.GetRightByObj(cnl.ObjNum ?? 0).Control &&
+                    else if (!(userContext.Rights.GetRightByObj(cnl.ObjNum).Control &&
                         userContext.Rights.GetRightByView(schemeView.ViewEntity).Control &&
-                        schemeView.Components.TryGetValue(componentID, out BaseComponent component) &&
+                        schemeView.Components.TryGetValue(componentID, out ComponentBase component) &&
                         component is IDynamicComponent dynamicComponent &&
                         dynamicComponent.Action == Actions.SendCommandNow &&
                         dynamicComponent.CtrlCnlNum == ctrlCnlNum))

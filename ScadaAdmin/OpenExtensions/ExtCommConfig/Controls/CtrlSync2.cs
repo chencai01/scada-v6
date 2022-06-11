@@ -6,6 +6,7 @@ using Scada.Admin.Project;
 using Scada.Comm;
 using Scada.Comm.Config;
 using Scada.Data.Entities;
+using Scada.Data.Models;
 using Scada.Data.Tables;
 using Scada.Forms;
 using System;
@@ -32,23 +33,23 @@ namespace Scada.Admin.Extensions.ExtCommConfig.Controls
         /// <summary>
         /// Fills the tree view according to the configuration database.
         /// </summary>
-        public void FillTreeView(ConfigBase configBase, int selectedLineNum)
+        public void FillTreeView(ConfigDataset configDataset, int selectedLineNum)
         {
-            ArgumentNullException.ThrowIfNull(configBase, nameof(configBase));
+            ArgumentNullException.ThrowIfNull(configDataset, nameof(configDataset));
 
             try
             {
                 treeView.BeginUpdate();
                 treeView.Nodes.Clear();
 
-                foreach (CommLine commLine in configBase.CommLineTable.Enumerate())
+                foreach (CommLine commLine in configDataset.CommLineTable.Enumerate())
                 {
                     TreeNode lineNode = new(CommUtils.GetLineTitle(commLine))
                     {
                         Tag = new TreeNodeTag(commLine, CommNodeType.Line)
                     };
 
-                    foreach (Device device in configBase.DeviceTable.Select(
+                    foreach (Device device in configDataset.DeviceTable.Select(
                         new TableFilter("CommLineNum", commLine.CommLineNum), true))
                     {
                         lineNode.Nodes.Add(new TreeNode(CommUtils.GetDeviceTitle(device))

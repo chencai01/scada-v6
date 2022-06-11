@@ -216,12 +216,14 @@ namespace Scada.Comm.Drivers.DrvHttpNotif.Logic
         /// </summary>
         private bool CreateRequest(Dictionary<string, string> args, out HttpRequestMessage request)
         {
+            request = null;
+
             try
             {
                 // initialize HTTP client
                 if (httpClient == null)
                 {
-                    httpClient = new HttpClient();
+                    httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(PollingOptions.Timeout) };
 
                     foreach (Header header in config.Headers)
                     {
@@ -255,7 +257,9 @@ namespace Scada.Comm.Drivers.DrvHttpNotif.Logic
                 Log.WriteLine(Locale.IsRussian ?
                     "Ошибка при создании запроса: {0}" :
                     "Error creating request: {0}", ex.Message);
+                httpClient?.Dispose();
                 httpClient = null;
+                request?.Dispose();
                 request = null;
                 return false;
             }
@@ -274,10 +278,14 @@ namespace Scada.Comm.Drivers.DrvHttpNotif.Logic
                     "Send request:");
                 Log.WriteLine(request.RequestUri.ToString());
 
+                HttpStatusCode responseStatus;
+                string responseContent;
                 stopwatch.Restart();
-                HttpResponseMessage response = httpClient.SendAsync(request).Result;
-                HttpStatusCode responseStatus = response.StatusCode;
-                string responseContent = response.Content.ReadAsStringAsync().Result;
+                using (HttpResponseMessage response = httpClient.SendAsync(request).Result)
+                {
+                    responseStatus = response.StatusCode;
+                    responseContent = response.Content.ReadAsStringAsync().Result;
+                }
                 stopwatch.Stop();
 
                 // output response to log
@@ -368,6 +376,14 @@ namespace Scada.Comm.Drivers.DrvHttpNotif.Logic
         }
 
         /// <summary>
+        /// Performs actions when terminating a communication line.
+        /// </summary>
+        public override void OnCommLineTerminate()
+        {
+            httpClient?.Dispose();
+        }
+
+        /// <summary>
         /// Initializes the device tags.
         /// </summary>
         public override void InitDeviceTags()
@@ -445,6 +461,8 @@ namespace Scada.Comm.Drivers.DrvHttpNotif.Logic
                             FinishRequest();
                             tryNum++;
                         }
+
+                        request.Dispose();
                     }
                 }
                 else

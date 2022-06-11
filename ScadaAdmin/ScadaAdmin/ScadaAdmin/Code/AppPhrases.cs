@@ -47,7 +47,7 @@ namespace Scada.Admin.App.Code
         public static string CommandEvent { get; private set; }
 
         // Scada.Admin.App.Code.ExplorerBuilder
-        public static string BaseNode { get; private set; }
+        public static string ConfigDatabaseNode { get; private set; }
         public static string PrimaryTablesNode { get; private set; }
         public static string SecondaryTablesNode { get; private set; }
         public static string ViewsNode { get; private set; }
@@ -121,7 +121,7 @@ namespace Scada.Admin.App.Code
         public static string ReplaceCount { get; private set; }
 
         // Scada.Admin.App.Forms.Tables.FrmLimCreate
-        public static string LimExistsInConfigBase { get; private set; }
+        public static string LimExistsInConfigDatabase { get; private set; }
         public static string DefaultLimName { get; private set; }
 
         // Scada.Admin.App.Forms.Tables.FrmTextDialog
@@ -168,7 +168,7 @@ namespace Scada.Admin.App.Code
         public static string DirectoryAlreadyExists { get; private set; }
         public static string FileAlreadyExists { get; private set; }
         public static string InstanceAlreadyExists { get; private set; }
-        public static string SaveConfigBaseConfirm { get; private set; }
+        public static string SaveConfigDatabaseConfirm { get; private set; }
         public static string DeviceNotFoundInComm { get; private set; }
         public static string WebUrlNotSet { get; private set; }
         public static string ReopenProject { get; private set; }
@@ -203,7 +203,7 @@ namespace Scada.Admin.App.Code
             CommandEvent = dict["CommandEvent"];
 
             dict = Locale.GetDictionary("Scada.Admin.App.Code.ExplorerBuilder");
-            BaseNode = dict["BaseNode"];
+            ConfigDatabaseNode = dict["ConfigDatabaseNode"];
             PrimaryTablesNode = dict["PrimaryTablesNode"];
             SecondaryTablesNode = dict["SecondaryTablesNode"];
             ViewsNode = dict["ViewsNode"];
@@ -277,7 +277,7 @@ namespace Scada.Admin.App.Code
             ReplaceCount = dict["ReplaceCount"];
 
             dict = Locale.GetDictionary("Scada.Admin.App.Forms.Tables.FrmLimCreate");
-            LimExistsInConfigBase = dict["LimExistsInConfigBase"];
+            LimExistsInConfigDatabase = dict["LimExistsInConfigDatabase"];
             DefaultLimName = dict["DefaultLimName"];
 
             dict = Locale.GetDictionary("Scada.Admin.App.Forms.Tables.FrmTextDialog");
@@ -324,7 +324,7 @@ namespace Scada.Admin.App.Code
             DirectoryAlreadyExists = dict["DirectoryAlreadyExists"];
             FileAlreadyExists = dict["FileAlreadyExists"];
             InstanceAlreadyExists = dict["InstanceAlreadyExists"];
-            SaveConfigBaseConfirm = dict["SaveConfigBaseConfirm"];
+            SaveConfigDatabaseConfirm = dict["SaveConfigDatabaseConfirm"];
             DeviceNotFoundInComm = dict["DeviceNotFoundInComm"];
             WebUrlNotSet = dict["WebUrlNotSet"];
             ReopenProject = dict["ReopenProject"];

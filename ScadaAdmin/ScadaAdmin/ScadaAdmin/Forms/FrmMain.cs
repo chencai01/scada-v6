@@ -258,7 +258,7 @@ namespace Scada.Admin.App.Forms
         /// </summary>
         private void DisableSaveAll()
         {
-            if (miFileSaveAll.Enabled && !Project.ConfigBase.Modified)
+            if (miFileSaveAll.Enabled && !Project.ConfigDatabase.Modified)
             {
                 bool saveAllEnabled = false;
 
@@ -659,18 +659,18 @@ namespace Scada.Admin.App.Forms
         /// <summary>
         /// Loads the configuration database.
         /// </summary>
-        private void LoadConfigBase()
+        private void LoadConfigDatabase()
         {
-            if (!Project.ConfigBase.Load(out string errMsg))
+            if (!Project.ConfigDatabase.Load(out string errMsg))
                 Log.HandleError(errMsg);
         }
 
         /// <summary>
         /// Saves the configuration database.
         /// </summary>
-        private bool SaveConfigBase()
+        private bool SaveConfigDatabase()
         {
-            if (Project.ConfigBase.Save(out string errMsg))
+            if (Project.ConfigDatabase.Save(out string errMsg))
             {
                 return true;
             }
@@ -692,7 +692,7 @@ namespace Scada.Admin.App.Forms
                     childForm.Save();
             }
 
-            SaveConfigBase();
+            SaveConfigDatabase();
         }
 
         /// <summary>
@@ -711,7 +711,7 @@ namespace Scada.Admin.App.Forms
                 {
                     appData.State.AddRecentProject(newProject.FileName);
                     appData.CurrentProject = newProject;
-                    LoadConfigBase();
+                    LoadConfigDatabase();
                     Text = string.Format(AppPhrases.ProjectTitle, Project.Name);
                     wctrlMain.MessageText = AppPhrases.SelectItemMessage;
                     SetMenuItemsEnabled();
@@ -748,7 +748,7 @@ namespace Scada.Admin.App.Forms
                 else
                     Log.HandleError(errMsg);
 
-                LoadConfigBase();
+                LoadConfigDatabase();
                 Text = string.Format(AppPhrases.ProjectTitle, Project.Name);
                 wctrlMain.MessageText = AppPhrases.SelectItemMessage;
                 SetMenuItemsEnabled();
@@ -770,13 +770,13 @@ namespace Scada.Admin.App.Forms
                 PrepareToCloseAll();
                 wctrlMain.CloseAllForms(out bool cancel);
 
-                if (!cancel && Project.ConfigBase.Modified)
+                if (!cancel && Project.ConfigDatabase.Modified)
                 {
-                    switch (MessageBox.Show(AppPhrases.SaveConfigBaseConfirm,
+                    switch (MessageBox.Show(AppPhrases.SaveConfigDatabaseConfirm,
                         CommonPhrases.QuestionCaption, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question))
                     {
                         case DialogResult.Yes:
-                            cancel = !SaveConfigBase();
+                            cancel = !SaveConfigDatabase();
                             break;
                         case DialogResult.No:
                             break;
@@ -920,9 +920,9 @@ namespace Scada.Admin.App.Forms
             bool tableSaved = false;
 
             if (saveChanges && Project != null && 
-                Project.ConfigBase.GetTable(itemType) is IBaseTable baseTable && baseTable.Modified)
+                Project.ConfigDatabase.GetTable(itemType) is IBaseTable baseTable && baseTable.Modified)
             {
-                if (Project.ConfigBase.SaveTable(baseTable, out string errMsg))
+                if (Project.ConfigDatabase.SaveTable(baseTable, out string errMsg))
                     tableSaved = true;
                 else
                     appData.ErrLog.HandleError(errMsg);
@@ -1270,8 +1270,8 @@ namespace Scada.Admin.App.Forms
 
                 if (frmDownloadConfig.BaseModified)
                 {
-                    CloseChildForms(explorerBuilder.BaseNode, false);
-                    SaveConfigBase();
+                    CloseChildForms(explorerBuilder.ConfigDatabaseNode, false);
+                    SaveConfigDatabase();
                 }
 
                 if (frmDownloadConfig.ViewModified && 
@@ -1474,9 +1474,9 @@ namespace Scada.Admin.App.Forms
             // refresh channel table subnodes
             if (Project != null)
             {
-                TreeNode cnlTableNode = explorerBuilder.BaseTableNodes[Project.ConfigBase.CnlTable.Name];
+                TreeNode cnlTableNode = explorerBuilder.BaseTableNodes[Project.ConfigDatabase.CnlTable.Name];
                 CloseChildForms(cnlTableNode, true, true);
-                explorerBuilder.FillCnlTableNode(cnlTableNode, Project.ConfigBase);
+                explorerBuilder.FillCnlTableNode(cnlTableNode, Project.ConfigDatabase);
             }
         }
 

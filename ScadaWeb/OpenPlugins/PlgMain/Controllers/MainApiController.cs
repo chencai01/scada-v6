@@ -21,7 +21,7 @@ namespace Scada.Web.Plugins.PlgMain.Controllers
 {
     /// <summary>
     /// Represents the plugin's web API.
-    /// <para>Представляет веб API плагина.</para>
+    /// <para>Представляет веб-API плагина.</para>
     /// </summary>
     /// <remarks>Note that double.NaN cannot be converted to JSON.</remarks>
     [ApiController]
@@ -66,12 +66,12 @@ namespace Scada.Web.Plugins.PlgMain.Controllers
 
             foreach (int cnlNum in cnlNums)
             {
-                Cnl cnl = webContext.ConfigBase.CnlTable.GetItem(cnlNum);
+                Cnl cnl = webContext.ConfigDatabase.CnlTable.GetItem(cnlNum);
 
-                if (cnl == null || cnl.ObjNum == null)
-                    throw new AccessDeniedException(); // no rights on undefined channel or object
+                if (cnl == null)
+                    throw new AccessDeniedException(); // no rights on undefined channel
 
-                if (!userContext.Rights.GetRightByObj(cnl.ObjNum.Value).View)
+                if (!userContext.Rights.GetRightByObj(cnl.ObjNum).View)
                     throw new AccessDeniedException();
             }
         }
@@ -117,7 +117,7 @@ namespace Scada.Web.Plugins.PlgMain.Controllers
         /// </summary>
         private CnlDataFormatter CreateFormatter()
         {
-            return new CnlDataFormatter(webContext.ConfigBase, webContext.ConfigBase.Enums, userContext.TimeZone);
+            return new CnlDataFormatter(webContext.ConfigDatabase, webContext.ConfigDatabase.Enums, userContext.TimeZone);
         }
 
         /// <summary>
@@ -148,7 +148,7 @@ namespace Scada.Web.Plugins.PlgMain.Controllers
         /// <summary>
         /// Gets the filter to request events by view.
         /// </summary>
-        private static DataFilter GetEventFilter(int limit, BaseView view)
+        private static DataFilter GetEventFilter(int limit, ViewBase view)
         {
             DataFilter dataFilter = GetEventFilter(limit);
             dataFilter.RequireAll = false;
@@ -234,7 +234,7 @@ namespace Scada.Web.Plugins.PlgMain.Controllers
                 for (int cnlIdx = 0; cnlIdx < cnlCnt; cnlIdx++)
                 {
                     int cnlNum = cnlNums[cnlIdx];
-                    Cnl cnl = webContext.ConfigBase.CnlTable.GetItem(cnlNum);
+                    Cnl cnl = webContext.ConfigDatabase.CnlTable.GetItem(cnlNum);
                     HistData.RecordList records = trends[cnlIdx] = new(pointCount);
                     TrendBundle.CnlDataList cnlDataList = trendBundle.Trends[cnlIdx];
 
@@ -379,7 +379,7 @@ namespace Scada.Web.Plugins.PlgMain.Controllers
         {
             try
             {
-                if (viewLoader.GetView(viewID, out BaseView view, out string errMsg))
+                if (viewLoader.GetView(viewID, out ViewBase view, out string errMsg))
                 {
                     CurData curData = memoryCache.GetOrCreate(PluginUtils.GetCacheKey("CurData", viewID), entry =>
                     {
@@ -434,7 +434,7 @@ namespace Scada.Web.Plugins.PlgMain.Controllers
         {
             try
             {
-                if (viewLoader.GetViewFromCache(viewID, out BaseView view, out string errMsg))
+                if (viewLoader.GetViewFromCache(viewID, out ViewBase view, out string errMsg))
                 {
                     TimeRange timeRange = CreateTimeRange(startTime, endTime, endInclusive);
                     HistData histData = memoryCache.GetOrCreate(
@@ -555,7 +555,7 @@ namespace Scada.Web.Plugins.PlgMain.Controllers
         {
             try
             {
-                if (viewLoader.GetViewFromCache(viewID, out BaseView view, out string errMsg))
+                if (viewLoader.GetViewFromCache(viewID, out ViewBase view, out string errMsg))
                 {
                     EventPacket eventPacket = memoryCache.GetOrCreate(
                         PluginUtils.GetCacheKey("LastEventsByView", archiveBit, period, limit, viewID),
@@ -607,7 +607,7 @@ namespace Scada.Web.Plugins.PlgMain.Controllers
         /// </summary>
         public Dto<string> LoadView(int viewID)
         {
-            return viewLoader.GetView(viewID, out BaseView view, out string errMsg)
+            return viewLoader.GetView(viewID, out ViewBase view, out string errMsg)
                 ? Dto<string>.Success(view.GetType().Name)
                 : Dto<string>.Fail(errMsg);
         }
@@ -624,11 +624,11 @@ namespace Scada.Web.Plugins.PlgMain.Controllers
                 string errMsg;
 
                 if (!webContext.AppConfig.GeneralOptions.EnableCommands ||
-                    !pluginContext.Options.CommandApi)
+                    !pluginContext.Options.AllowCommandApi)
                 {
                     errMsg = WebPhrases.CommandsDisabled;
                 }
-                else if (webContext.ConfigBase.CnlTable.GetItem(cnlNum) is not Cnl cnl)
+                else if (webContext.ConfigDatabase.CnlTable.GetItem(cnlNum) is not Cnl cnl)
                 {
                     errMsg = string.Format(WebPhrases.CnlNotFound, cnlNum);
                 }
@@ -636,7 +636,7 @@ namespace Scada.Web.Plugins.PlgMain.Controllers
                 {
                     errMsg = string.Format(WebPhrases.CnlNotOutput, cnlNum);
                 }
-                else if (!userContext.Rights.GetRightByObj(cnl.ObjNum ?? 0).Control)
+                else if (!userContext.Rights.GetRightByObj(cnl.ObjNum).Control)
                 {
                     errMsg = WebPhrases.AccessDenied;
                 }

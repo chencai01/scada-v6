@@ -25,8 +25,6 @@
 
 using Scada.Client;
 using Scada.Config;
-using Scada.Lang;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
@@ -37,7 +35,7 @@ namespace Scada.Web.Config
     /// Represents a web application configuration.
     /// <para>Представляет конфигурацию веб-приложения.</para>
     /// </summary>
-    public class WebConfig : BaseConfig
+    public class WebConfig : ConfigBase
     {
         /// <summary>
         /// The default configuration file name.

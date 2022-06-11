@@ -68,7 +68,7 @@ namespace Scada.Web.Users
         private ViewNode CreateBranch(View viewEntity)
         {
             // split view path
-            BaseView.ParsePath(viewEntity, out string[] pathParts, out string nodeText);
+            ViewBase.ParsePath(viewEntity, out string[] pathParts, out string nodeText);
 
             if (string.IsNullOrEmpty(nodeText))
                 return null;
@@ -237,10 +237,10 @@ namespace Scada.Web.Users
             {
                 WebContext = webContext;
 
-                foreach (View viewEntity in webContext.ConfigBase.SortedViews)
+                foreach (View viewEntity in webContext.ConfigDatabase.SortedViews)
                 {
                     if (!viewEntity.Hidden &&
-                        userRights.GetRightByObj(viewEntity.ObjNum ?? 0).View &&
+                        userRights.GetRightByObj(viewEntity.ObjNum).View &&
                         CreateBranch(viewEntity) is ViewNode branchRootNode)
                     {
                         MergeViewNodes(ViewNodes, new List<ViewNode> { branchRootNode }, 0);

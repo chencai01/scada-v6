@@ -41,7 +41,7 @@ namespace Scada
         /// </summary>
         public LibraryView()
         {
-            BaseDataSet = null;
+            ConfigDataset = null;
             AppDirs = null;
             AgentClient = null;
             CanShowProperties = false;
@@ -58,16 +58,16 @@ namespace Scada
             if (parentView == null)
                 throw new ArgumentNullException(nameof(parentView));
 
-            BaseDataSet = parentView.BaseDataSet;
+            ConfigDataset = parentView.ConfigDataset;
             AppDirs = parentView.AppDirs;
             AgentClient = parentView.AgentClient;
         }
 
 
         /// <summary>
-        /// Gets or sets the configuration database cache.
+        /// Gets or sets the cached configuration database.
         /// </summary>
-        public BaseDataSet BaseDataSet { get; set; }
+        public ConfigDataset ConfigDataset { get; set; }
 
         /// <summary>
         /// Gets or sets the application directories.
@@ -94,6 +94,17 @@ namespace Scada
         /// Gets the product code for registration.
         /// </summary>
         public string ProductCode { get; protected set; }
+
+        /// <summary>
+        /// Gets the library version.
+        /// </summary>
+        public virtual string Version
+        {
+            get
+            {
+                return GetType().Assembly.GetName().Version.ToString();
+            }
+        }
 
 
         /// <summary>

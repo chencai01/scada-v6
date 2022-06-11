@@ -20,7 +20,7 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2011
- * Modified : 2021
+ * Modified : 2022
  */
 
 using Scada.Data.Entities;
@@ -35,7 +35,7 @@ namespace Scada.Data.Models
     /// Represents the base class for views.
     /// <para>Представляет базовый класс представлений.</para>
     /// </summary>
-    public abstract class BaseView
+    public abstract class ViewBase
     {
         /// <summary>
         /// The view path separator.
@@ -46,7 +46,7 @@ namespace Scada.Data.Models
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
-        public BaseView(View viewEntity)
+        public ViewBase(View viewEntity)
         {
             ViewEntity = viewEntity ?? throw new ArgumentNullException(nameof(viewEntity));
             ViewStamp = ScadaUtils.GenerateUniqueID();
@@ -72,7 +72,7 @@ namespace Scada.Data.Models
         /// <summary>
         /// Gets a value indicating whether to download a view from the server.
         /// </summary>
-        public bool StoredOnServer { get; }
+        public bool StoredOnServer { get; protected set; }
 
         /// <summary>
         /// Gets the view arguments.
@@ -206,7 +206,7 @@ namespace Scada.Data.Models
         /// <summary>
         /// Binds the view to the configuration database.
         /// </summary>
-        public virtual void Bind(BaseDataSet baseDataSet)
+        public virtual void Bind(ConfigDataset configDataset)
         {
         }
 

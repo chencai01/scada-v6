@@ -23,29 +23,39 @@
  * Modified : 2022
  */
 
+using System;
+
 namespace Scada.Web.Api
 {
     /// <summary>
     /// Represents a data transfer object that carries a method result from the server side to a client.
     /// <para>Представляет объект, передающий результат метода со стороны сервера клиенту.</para>
     /// </summary>
-    public class Dto
+    public class Dto : SimpleResult
     {
         /// <summary>
-        /// Gets or sets a value indicating whether the request is successful.
+        /// Initializes a new instance of the class.
         /// </summary>
-        public bool Ok { get; set; }
+        public Dto()
+            : base()
+        {
+        }
 
         /// <summary>
-        /// Gets or sets the message.
+        /// Initializes a new instance of the class.
         /// </summary>
-        public string Msg { get; set; }
+        public Dto(SimpleResult simpleResult)
+        {
+            ArgumentNullException.ThrowIfNull(simpleResult, nameof(simpleResult));
+            Ok = simpleResult.Ok;
+            Msg = simpleResult.Msg;
+        }
 
 
         /// <summary>
         /// Creates a new data transfer object with the successfull result.
         /// </summary>
-        public static Dto Success()
+        public static new Dto Success()
         {
             return new Dto
             {
@@ -57,7 +67,7 @@ namespace Scada.Web.Api
         /// <summary>
         /// Creates a new data transfer object with the failed result.
         /// </summary>
-        public static Dto Fail(string msg)
+        public static new Dto Fail(string msg)
         {
             return new Dto
             {

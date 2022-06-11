@@ -5,6 +5,7 @@
     Layout = "_BasicLayout";
     dynamic dict = Locale.GetDictionary("Scada.Web.Plugins.PlgMain.Areas.Main.Pages.Command");
     ViewBag.Title = dict.PageTitle;
+    ViewBag.BodyCssClass = "modal-page";
 
     var messageNotEmpty = !string.IsNullOrEmpty(Model.Message);
     var pwdExtraClass = Model.PwdIsInvalid ? "is-invalid" : "";
@@ -122,7 +123,5 @@
                 <textarea id="txtCmdData" class="form-control @cmdExtraClass" rows="3" asp-for="CmdData"></textarea>
             </div>
         }
-
-        <button type="submit" id="btnSubmit" class="rs-modal-submit hidden">Submit</button>
     </form>
 }

@@ -122,9 +122,9 @@ class ScadaUtils {
     }
 
     // Checks that the frame is accessible due to the browser security.
-    static checkAccessToFrame(frameWnd) {
+    static checkAccessToFrame(frameWnd, opt_requireJq) {
         try {
-            return frameWnd.document !== null;
+            return frameWnd.document !== null && (!opt_requireJq || frameWnd.$);
         } catch (ex) {
             return false;
         }
@@ -134,6 +134,16 @@ class ScadaUtils {
     static isRussian(opt_locale) {
         let lang = opt_locale || navigator.language.toLowerCase();
         return lang === "ru" || lang.startsWith("ru");
+    }
+
+    // Converts the string to an array of integers.
+    static parseIntArray(s) {
+        return s ? s.split(",").map(x => parseInt(x)) : [];
+    }
+
+    // Converts the string to a set of integers.
+    static parseIntSet(s) {
+        return new Set(ScadaUtils.parseIntArray(s));
     }
 }
 

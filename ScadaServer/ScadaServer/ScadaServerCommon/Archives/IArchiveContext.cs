@@ -20,11 +20,10 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2020
- * Modified : 2021
+ * Modified : 2022
  */
 
 using Scada.Config;
-using Scada.Data.Models;
 using Scada.Log;
 using Scada.Server.Config;
 using System.Collections.Generic;
@@ -58,9 +57,9 @@ namespace Scada.Server.Archives
         ILog Log { get; }
 
         /// <summary>
-        /// Gets the configuration database cache.
+        /// Gets the cached configuration database.
         /// </summary>
-        BaseDataSet BaseDataSet { get; }
+        ConfigDatabase ConfigDatabase { get; }
 
         /// <summary>
         /// Gets the application level shared data.

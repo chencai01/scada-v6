@@ -20,7 +20,7 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2020
- * Modified : 2021
+ * Modified : 2022
  */
 
 using Scada.Comm.DataSources;
@@ -191,9 +191,9 @@ namespace Scada.Comm.Engine
         }
 
         /// <summary>
-        /// Calls the ReadBase method of the data sources.
+        /// Calls the ReadConfigDatabase method of the data sources.
         /// </summary>
-        public bool ReadBase(out BaseDataSet baseDataSet)
+        public bool ReadConfigDatabase(out ConfigDatabase configDatabase)
         {
             foreach (DataSourceLogic dataSourceLogic in dataSources)
             {
@@ -201,17 +201,18 @@ namespace Scada.Comm.Engine
                 {
                     if (dataSourceLogic.IsReady)
                     {
-                        if (dataSourceLogic.ReadBase(out baseDataSet))
+                        if (dataSourceLogic.ReadConfigDatabase(out configDatabase))
                             return true;
                     }
                 }
                 catch (Exception ex)
                 {
-                    log.WriteError(ex, CommPhrases.ErrorInDataSource, nameof(ReadBase), dataSourceLogic.Code);
+                    log.WriteError(ex, CommPhrases.ErrorInDataSource, 
+                        nameof(ReadConfigDatabase), dataSourceLogic.Code);
                 }
             }
 
-            baseDataSet = null;
+            configDatabase = null;
             return false;
         }
 

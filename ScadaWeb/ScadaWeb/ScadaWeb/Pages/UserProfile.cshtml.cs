@@ -1,27 +1,5 @@
-﻿/*
- * Copyright 2022 Rapid Software LLC
- * 
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- * 
- *     http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * 
- * 
- * Product  : Rapid SCADA
- * Module   : Webstation Application
- * Summary  : Represents a user profile page
- * 
- * Author   : Mikhail Shiryaev
- * Created  : 2021
- * Modified : 2021
- */
+﻿// Copyright (c) Rapid Software LLC. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -62,7 +40,7 @@ namespace Scada.Web.Pages
             else if (!userContext.Rights.Full)
                 return Forbid();
             else
-                userEntity = webContext.ConfigBase.UserTable.GetItem(UserID);
+                userEntity = webContext.ConfigDatabase.UserTable.GetItem(UserID);
 
             // get user properties
             if (userEntity == null)
@@ -73,7 +51,7 @@ namespace Scada.Web.Pages
             else
             {
                 Username = userEntity.Name;
-                Data.Entities.Role roleEntity = webContext.ConfigBase.RoleTable.GetItem(userEntity.RoleID);
+                Data.Entities.Role roleEntity = webContext.ConfigDatabase.RoleTable.GetItem(userEntity.RoleID);
                 RoleName = roleEntity == null ? "" : roleEntity.Name;
             }
 

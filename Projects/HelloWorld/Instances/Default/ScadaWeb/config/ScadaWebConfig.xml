@@ -34,6 +34,7 @@
     <Plugin code="PlgMain" />
     <Plugin code="PlgScheme" />
     <Plugin code="PlgSchBasicComp" />
+    <Plugin code="PlgWebPage" />
   </Plugins>
   <PluginAssignment>
     <ChartFeature>PlgChart</ChartFeature>
@@ -53,7 +54,8 @@
       <Option name="EventArchiveCode" value="Events" />
       <Option name="EventCount" value="100" />
       <Option name="EventDepth" value="2" />
-      <Option name="CommandPassword" value="false" />
+      <Option name="AllowCommandApi" value="false" />
+      <Option name="AllowAuthApi" value="false" />
     </OptionGroup>
     <OptionGroup name="Scheme">
       <!-- ScaleType: Numeric | FitScreen | FitWidth -->

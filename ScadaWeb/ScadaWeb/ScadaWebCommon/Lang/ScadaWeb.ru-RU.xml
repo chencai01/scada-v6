@@ -47,6 +47,14 @@
     <Phrase key="PageTitle">Доступ запрещен</Phrase>
     <Phrase key="ErrorMessage">У вас недостаточно прав для доступа к запрошенному ресурсу.</Phrase>
   </Dictionary>
+  <Dictionary key="Scada.Web.Pages.CnlSelect">
+    <Phrase key="PageTitle">Выбор каналов</Phrase>
+    <Phrase key="lblObj">Объект</Phrase>
+    <Phrase key="lblOnlySelected">Показывать только выбранные каналы</Phrase>
+    <Phrase key="SelectObjectItem">-- Выберите объект --</Phrase>
+    <Phrase key="FilterRequired">Укажите фильтр, пожалуйста</Phrase>
+    <Phrase key="NoChannels">Каналы, удовлетворяющие фильтру, отсутствуют</Phrase>
+  </Dictionary>
   <Dictionary key="Scada.Web.Pages.Error">
     <Phrase key="PageTitle">Ошибка</Phrase>
     <Phrase key="ErrorMessage">При обработке вашего запроса произошла ошибка.</Phrase>
@@ -81,6 +89,7 @@
     <Phrase key="CnlNotOutput">Канал {0} не является выходным.</Phrase>
     <Phrase key="CommandsDisabled">Команды отключены.</Phrase>
     <Phrase key="SendCommand">Отправка команды на канал {0} пользователем {1}</Phrase>
+    <Phrase key="ActionNotAllowed">Действие не разрешено.</Phrase>
   </Dictionary>
   <Dictionary key="Scada.Web.TreeView.MenuItem">
     <Phrase key="ReportsMenuItem">Отчёты</Phrase>

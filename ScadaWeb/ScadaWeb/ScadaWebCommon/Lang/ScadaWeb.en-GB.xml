@@ -47,6 +47,14 @@
     <Phrase key="PageTitle">Access Denied</Phrase>
     <Phrase key="ErrorMessage">You have insufficient rights to access the requested resource.</Phrase>
   </Dictionary>
+  <Dictionary key="Scada.Web.Pages.CnlSelect">
+    <Phrase key="PageTitle">Select Channels</Phrase>
+    <Phrase key="lblObj">Object</Phrase>
+    <Phrase key="lblOnlySelected">Show only selected channels</Phrase>
+    <Phrase key="SelectObjectItem">-- Select an object --</Phrase>
+    <Phrase key="FilterRequired">Please specify a filter</Phrase>
+    <Phrase key="NoChannels">No channels matching the filter</Phrase>
+  </Dictionary>
   <Dictionary key="Scada.Web.Pages.Error">
     <Phrase key="PageTitle">Error</Phrase>
     <Phrase key="ErrorMessage">An error occurred while processing your request.</Phrase>
@@ -81,6 +89,7 @@
     <Phrase key="CnlNotOutput">Channel {0} is not an output.</Phrase>
     <Phrase key="CommandsDisabled">Commands disabled.</Phrase>
     <Phrase key="SendCommand">Send command to channel {0} by {1}</Phrase>
+    <Phrase key="ActionNotAllowed">Action not allowed.</Phrase>
   </Dictionary>
   <Dictionary key="Scada.Web.TreeView.MenuItem">
     <Phrase key="ReportsMenuItem">Reports</Phrase>

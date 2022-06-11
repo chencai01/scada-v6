@@ -4,6 +4,7 @@
     Layout = "_BasicLayout";
     dynamic dict = Locale.GetDictionary("Scada.Web.Plugins.PlgMain.Areas.Main.Pages.EventAck");
     ViewBag.Title = dict.PageTitle;
+    ViewBag.BodyCssClass = "modal-page";
 }
 
 @section Styles {
@@ -48,7 +49,7 @@
     if (Model.AckAllowed)
     {
         <div class="alert alert-primary">@dict.AckTip</div>
-        <form method="post"><button type="submit" class="rs-modal-submit hidden">Submit</button></form>
+        <form method="post"></form>
     }
 
     <table id="tblEvent" class="table-main" data-color="@Model.EventF.Color">

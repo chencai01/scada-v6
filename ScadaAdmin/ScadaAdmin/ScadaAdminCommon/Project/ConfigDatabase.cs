@@ -20,7 +20,7 @@
  * 
  * Author   : Mikhail Shiryaev
  * Created  : 2018
- * Modified : 2021
+ * Modified : 2022
  */
 
 using Scada.Admin.Lang;
@@ -39,7 +39,7 @@ namespace Scada.Admin.Project
     /// Represents a configuration database of a project.
     /// <para>Представляет базу конфигурации проекта.</para>
     /// </summary>
-    public class ConfigBase : BaseDataSet
+    public class ConfigDatabase : ConfigDataset
     {
         /// <summary>
         /// The minimum ID value.
@@ -62,7 +62,7 @@ namespace Scada.Admin.Project
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
-        public ConfigBase()
+        public ConfigDatabase()
             : base()
         {
             BaseDir = "";
@@ -202,7 +202,7 @@ namespace Scada.Admin.Project
             }
             catch (Exception ex)
             {
-                errMsg = ex.BuildErrorMessage(AdminPhrases.LoadConfigBaseError);
+                errMsg = ex.BuildErrorMessage(AdminPhrases.LoadConfigDatabaseError);
                 return false;
             }
         }
@@ -238,7 +238,7 @@ namespace Scada.Admin.Project
             }
             catch (Exception ex)
             {
-                errMsg = ex.BuildErrorMessage(AdminPhrases.SaveConfigBaseError);
+                errMsg = ex.BuildErrorMessage(AdminPhrases.SaveConfigDatabaseError);
                 return false;
             }
         }
